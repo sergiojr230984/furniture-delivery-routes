@@ -2,14 +2,18 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  try {
+    const supabase = createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  if (user) {
-    redirect('/dashboard')
-  } else {
-    redirect('/login')
+    if (user) {
+      redirect('/dashboard')
+    }
+  } catch {
+    // Supabase not reachable (missing env vars) — fall through to login
   }
+
+  redirect('/login')
 }
