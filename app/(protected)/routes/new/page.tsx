@@ -33,23 +33,23 @@ export default async function NewRoutePage() {
   const today = new Date().toISOString().split('T')[0]
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <div className="mb-6">
+    <div className="p-4 md:p-6 max-w-xl mx-auto">
+      <div className="mb-5">
         <Link href="/routes" className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1 mb-4">
           ← Back to routes
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">New Route</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900">New Route</h1>
         <p className="text-slate-500 text-sm mt-0.5">Create a new delivery route</p>
       </div>
 
-      <form action={createRoute} className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+      <form action={createRoute} className="bg-white rounded-xl border border-slate-200 p-4 md:p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1.5">Route name *</label>
           <input
             name="name"
             required
             placeholder="e.g. North Side AM"
-            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
 
@@ -60,7 +60,7 @@ export default async function NewRoutePage() {
             type="date"
             required
             defaultValue={today}
-            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
 
@@ -68,7 +68,7 @@ export default async function NewRoutePage() {
           <label className="block text-sm font-medium text-slate-700 mb-1.5">Assign driver</label>
           <select
             name="driver_id"
-            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
           >
             <option value="">— Unassigned —</option>
             {drivers.map((d) => (
@@ -85,14 +85,14 @@ export default async function NewRoutePage() {
             name="notes"
             rows={3}
             placeholder="Optional notes for this route…"
-            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
           />
         </div>
 
         <div className="flex gap-3 pt-2">
           <button
             type="submit"
-            className="flex-1 bg-blue-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="flex-1 bg-orange-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-orange-700 transition-colors"
           >
             Create Route
           </button>
