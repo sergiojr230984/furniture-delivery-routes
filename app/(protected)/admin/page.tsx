@@ -68,13 +68,13 @@ export default async function AdminPage() {
                   </div>
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      u.role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'
+                      u.role === 'admin' ? 'bg-orange-100 text-orange-800' : 'bg-slate-100 text-slate-600'
                     }`}>
                       {u.role}
                     </span>
                     {!isSelf && (
                       <form action={u.role === 'admin' ? makeDriver : makeAdmin}>
-                        <button type="submit" className="text-xs text-blue-600 hover:text-blue-700 underline">
+                        <button type="submit" className="text-xs text-orange-600 hover:text-orange-700 underline">
                           Make {u.role === 'admin' ? 'driver' : 'admin'}
                         </button>
                       </form>
@@ -113,7 +113,7 @@ export default async function AdminPage() {
                   <td className="px-5 py-3.5">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        u.role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-600'
+                        u.role === 'admin' ? 'bg-orange-100 text-orange-800' : 'bg-slate-100 text-slate-600'
                       }`}
                     >
                       {u.role}
@@ -125,7 +125,7 @@ export default async function AdminPage() {
                   <td className="px-5 py-3.5 text-right">
                     {!isSelf && (
                       <form action={u.role === 'admin' ? makeDriver : makeAdmin}>
-                        <button type="submit" className="text-xs text-blue-600 hover:text-blue-700 underline">
+                        <button type="submit" className="text-xs text-orange-600 hover:text-orange-700 underline">
                           Make {u.role === 'admin' ? 'driver' : 'admin'}
                         </button>
                       </form>

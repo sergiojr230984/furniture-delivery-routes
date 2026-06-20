@@ -53,7 +53,7 @@ export default function Sidebar({ userEmail }: { userEmail: string }) {
       <aside className="hidden md:flex w-64 bg-slate-900 h-screen flex-col flex-shrink-0">
         <div className="p-5 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2.5 0M13 16H9m4 0h2.586a1 1 0 00.707-.293l3.414-3.414a1 1 0 00.293-.707V9a1 1 0 00-1-1h-2m-5 8H3" />

@@ -31,7 +31,7 @@ export default async function RoutesPage({
         </div>
         <Link
           href="/routes/new"
-          className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="bg-orange-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
         >
           + New
         </Link>
@@ -43,7 +43,7 @@ export default async function RoutesPage({
           type="date"
           name="date"
           defaultValue={date}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
         <button
           type="submit"
@@ -56,7 +56,7 @@ export default async function RoutesPage({
       {routes.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 px-6 py-16 text-center">
           <p className="text-slate-400 text-sm">No routes found for {date}.</p>
-          <Link href="/routes/new" className="inline-block mt-3 text-blue-600 hover:underline text-sm font-medium">
+          <Link href="/routes/new" className="inline-block mt-3 text-orange-600 hover:underline text-sm font-medium">
             Create a route
           </Link>
         </div>
@@ -71,7 +71,7 @@ export default async function RoutesPage({
               <Link
                 key={route.id}
                 href={`/routes/${route.id}`}
-                className="block bg-white rounded-xl border border-slate-200 px-5 py-4 hover:border-blue-300 hover:shadow-sm transition-all"
+                className="block bg-white rounded-xl border border-slate-200 px-5 py-4 hover:border-orange-300 hover:shadow-sm transition-all"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">

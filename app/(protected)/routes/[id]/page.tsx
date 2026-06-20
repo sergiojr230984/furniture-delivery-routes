@@ -103,7 +103,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
           <div className="flex gap-2 flex-shrink-0">
             {route.status === 'pending' && (
               <form action={updateRouteStatusBound.bind(null, 'in_progress')}>
-                <button className="text-sm bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="text-sm bg-orange-600 text-white px-3 py-2 rounded-lg hover:bg-orange-700 transition-colors">
                   Start
                 </button>
               </form>
@@ -271,7 +271,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
                 name="customer_name"
                 required
                 placeholder="Jane Smith"
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
             <div>
@@ -280,7 +280,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
                 name="customer_phone"
                 type="tel"
                 placeholder="+1 555 000 0000"
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
@@ -291,7 +291,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
                 name="address"
                 required
                 placeholder="123 Main St"
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
             <div>
@@ -299,7 +299,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
               <input
                 name="city"
                 placeholder="Chicago"
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
@@ -309,7 +309,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
               <input
                 name="items_description"
                 placeholder="3-piece sofa set"
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
             <div>
@@ -317,7 +317,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
               <input
                 name="time_window"
                 placeholder="9am – 12pm"
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
@@ -326,12 +326,12 @@ export default async function RouteDetailPage({ params }: { params: { id: string
             <input
               name="notes"
               placeholder="Gate code, floor, special instructions…"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
           <button
             type="submit"
-            className="w-full sm:w-auto bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors"
+            className="w-full sm:w-auto bg-orange-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-orange-700 transition-colors"
           >
             Add Delivery
           </button>

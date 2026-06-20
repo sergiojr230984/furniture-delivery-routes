@@ -55,7 +55,7 @@ export default async function DashboardPage() {
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
           <h2 className="font-semibold text-slate-900 text-sm md:text-base">Today&apos;s Routes</h2>
-          <Link href="/routes/new" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+          <Link href="/routes/new" className="text-sm text-orange-600 hover:text-orange-700 font-medium">
             + New
           </Link>
         </div>
@@ -63,7 +63,7 @@ export default async function DashboardPage() {
         {routes.length === 0 ? (
           <div className="px-4 py-10 text-center text-slate-400 text-sm">
             No routes today.{' '}
-            <Link href="/routes/new" className="text-blue-600 hover:underline">Create one</Link>
+            <Link href="/routes/new" className="text-orange-600 hover:underline">Create one</Link>
           </div>
         ) : (
           <>
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
                       <td className="px-5 py-3.5 text-slate-600">{done}/{total}</td>
                       <td className="px-5 py-3.5"><StatusBadge status={route.status} /></td>
                       <td className="px-5 py-3.5 text-right">
-                        <Link href={`/routes/${route.id}`} className="text-blue-600 hover:text-blue-700 font-medium text-xs">View →</Link>
+                        <Link href={`/routes/${route.id}`} className="text-orange-600 hover:text-orange-700 font-medium text-xs">View →</Link>
                       </td>
                     </tr>
                   )
