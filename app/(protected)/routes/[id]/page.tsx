@@ -79,15 +79,15 @@ export default async function RouteDetailPage({ params }: { params: { id: string
   const deliveryStatuses: DeliveryStatus[] = ['delivered', 'failed', 'rescheduled', 'pending']
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-6">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      <div className="mb-5">
         <Link href="/routes" className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1 mb-4">
           ← Back to routes
         </Link>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-bold text-slate-900">{route.name}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <h1 className="text-xl md:text-2xl font-bold text-slate-900">{route.name}</h1>
               <StatusBadge status={route.status} />
             </div>
             <p className="text-slate-500 text-sm">
@@ -103,21 +103,21 @@ export default async function RouteDetailPage({ params }: { params: { id: string
           <div className="flex gap-2 flex-shrink-0">
             {route.status === 'pending' && (
               <form action={updateRouteStatusBound.bind(null, 'in_progress')}>
-                <button className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
-                  Start Route
+                <button className="text-sm bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                  Start
                 </button>
               </form>
             )}
             {route.status === 'in_progress' && (
               <form action={updateRouteStatusBound.bind(null, 'completed')}>
-                <button className="text-sm bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors">
+                <button className="text-sm bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors">
                   Complete
                 </button>
               </form>
             )}
             {(route.status === 'pending' || route.status === 'in_progress') && (
               <form action={updateRouteStatusBound.bind(null, 'cancelled')}>
-                <button className="text-sm bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-300 transition-colors">
+                <button className="text-sm bg-slate-200 text-slate-700 px-3 py-2 rounded-lg hover:bg-slate-300 transition-colors">
                   Cancel
                 </button>
               </form>
@@ -126,7 +126,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
         <div className="bg-white rounded-xl border border-slate-200 p-4 col-span-2">
           <h2 className="font-semibold text-slate-900 mb-3">Route Info</h2>
           <div className="grid grid-cols-2 gap-3 text-sm">
@@ -177,7 +177,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-4 md:mb-6">
         <div className="px-5 py-4 border-b border-slate-100">
           <h2 className="font-semibold text-slate-900">
             Deliveries <span className="text-slate-400 font-normal">({deliveries.length})</span>
@@ -264,7 +264,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
       <div className="bg-white rounded-xl border border-slate-200 p-5">
         <h2 className="font-semibold text-slate-900 mb-4">Add Delivery</h2>
         <form action={addDeliveryForRoute} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">Customer name *</label>
               <input
@@ -284,7 +284,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">Address *</label>
               <input
@@ -303,7 +303,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">Items</label>
               <input
@@ -331,7 +331,7 @@ export default async function RouteDetailPage({ params }: { params: { id: string
           </div>
           <button
             type="submit"
-            className="bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors"
+            className="w-full sm:w-auto bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Add Delivery
           </button>

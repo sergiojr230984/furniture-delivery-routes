@@ -23,21 +23,21 @@ export default async function RoutesPage({
   })[]
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Routes</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-900">Routes</h1>
           <p className="text-slate-500 text-sm mt-0.5">Delivery routes by date</p>
         </div>
         <Link
           href="/routes/new"
           className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
-          + New Route
+          + New
         </Link>
       </div>
 
-      <form method="GET" className="mb-6 flex items-center gap-3">
+      <form method="GET" className="mb-5 flex items-center gap-2">
         <label className="text-sm font-medium text-slate-700">Date</label>
         <input
           type="date"

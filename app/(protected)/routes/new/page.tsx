@@ -33,16 +33,16 @@ export default async function NewRoutePage() {
   const today = new Date().toISOString().split('T')[0]
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <div className="mb-6">
+    <div className="p-4 md:p-6 max-w-xl mx-auto">
+      <div className="mb-5">
         <Link href="/routes" className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1 mb-4">
           ← Back to routes
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">New Route</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900">New Route</h1>
         <p className="text-slate-500 text-sm mt-0.5">Create a new delivery route</p>
       </div>
 
-      <form action={createRoute} className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+      <form action={createRoute} className="bg-white rounded-xl border border-slate-200 p-4 md:p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1.5">Route name *</label>
           <input
