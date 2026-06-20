@@ -111,31 +111,39 @@ returns boolean language sql security definer as $$
 $$;
 
 -- profiles
+drop policy if exists "Users can view own profile" on profiles;
 create policy "Users can view own profile"
   on profiles for select using (auth.uid() = id);
 
+drop policy if exists "Admins can view all profiles" on profiles;
 create policy "Admins can view all profiles"
   on profiles for select using (is_admin());
 
+drop policy if exists "Users can update own profile" on profiles;
 create policy "Users can update own profile"
   on profiles for update using (auth.uid() = id);
 
+drop policy if exists "Admins can update all profiles" on profiles;
 create policy "Admins can update all profiles"
   on profiles for update using (is_admin());
 
 -- drivers
+drop policy if exists "Admins manage drivers" on drivers;
 create policy "Admins manage drivers"
   on drivers for all using (is_admin());
 
+drop policy if exists "Drivers can view their own record" on drivers;
 create policy "Drivers can view their own record"
   on drivers for select using (
     profile_id = auth.uid()
   );
 
 -- routes
+drop policy if exists "Admins manage routes" on routes;
 create policy "Admins manage routes"
   on routes for all using (is_admin());
 
+drop policy if exists "Drivers can view their own routes" on routes;
 create policy "Drivers can view their own routes"
   on routes for select using (
     driver_id in (
@@ -144,9 +152,11 @@ create policy "Drivers can view their own routes"
   );
 
 -- deliveries
+drop policy if exists "Admins manage deliveries" on deliveries;
 create policy "Admins manage deliveries"
   on deliveries for all using (is_admin());
 
+drop policy if exists "Drivers can view deliveries on their routes" on deliveries;
 create policy "Drivers can view deliveries on their routes"
   on deliveries for select using (
     route_id in (
@@ -156,6 +166,7 @@ create policy "Drivers can view deliveries on their routes"
     )
   );
 
+drop policy if exists "Drivers can update delivery status on their routes" on deliveries;
 create policy "Drivers can update delivery status on their routes"
   on deliveries for update using (
     route_id in (
