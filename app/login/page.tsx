@@ -41,7 +41,7 @@ export default function LoginPage() {
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-white">
             <Truck className="h-6 w-6" />
           </div>
-          <h1 className="text-xl font-bold">FleetRoute</h1>
+          <h1 className="text-xl font-bold">La Cuevita</h1>
           <p className="text-sm text-gray-500">Delivery & route management</p>
         </div>
 

@@ -22,7 +22,7 @@ export default async function DashboardLayout({
           </div>
           <div>
             <Link href="/" className="block text-base font-bold leading-tight">
-              FleetRoute
+              La Cuevita
             </Link>
             <p className="text-xs text-gray-400">Delivery & routes</p>
           </div>

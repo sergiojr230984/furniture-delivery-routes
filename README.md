@@ -1,4 +1,4 @@
-# FleetRoute — Furniture Delivery & Route Management
+# La Cuevita — Furniture Delivery & Route Management
 
 A web app for a retail furniture store to manage customer deliveries, supplier
 pickups, vans, drivers/helpers, routes and proof-of-delivery.
@@ -134,6 +134,30 @@ npm run dev
 
 Open <http://localhost:3000>. Drivers are redirected to `/driver`; staff land on
 the dashboard.
+
+---
+
+## Deploy to Vercel
+
+This repo includes a [`vercel.json`](vercel.json) so Vercel auto-detects the
+Next.js framework and deploys `main` on every push.
+
+1. In [vercel.com](https://vercel.com) → **Add New → Project**, import this
+   GitHub repo.
+2. Add the three environment variables (Project → **Settings → Environment
+   Variables**) for the **Production** environment — the same values from your
+   `.env.local`:
+
+   ```
+   NEXT_PUBLIC_SUPABASE_URL
+   NEXT_PUBLIC_SUPABASE_ANON_KEY
+   SUPABASE_SERVICE_ROLE_KEY
+   ```
+
+3. Deploy. Subsequent pushes to `main` redeploy automatically.
+
+> Without these env vars the build's static prerender fails (the Supabase
+> client requires a URL and key), so set them **before** the first deploy.
 
 ---
 
