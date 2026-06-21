@@ -140,13 +140,16 @@ the dashboard.
 ## Deploy to Vercel
 
 This repo includes a [`vercel.json`](vercel.json) so Vercel auto-detects the
-Next.js framework and deploys `main` on every push.
+Next.js framework. There are two ways to ship it — pick **one** (running both
+causes duplicate deploys).
+
+### One-time project setup (required for either option)
 
 1. In [vercel.com](https://vercel.com) → **Add New → Project**, import this
-   GitHub repo.
+   GitHub repo (this creates the Vercel project and its org/project IDs).
 2. Add the three environment variables (Project → **Settings → Environment
-   Variables**) for the **Production** environment — the same values from your
-   `.env.local`:
+   Variables**) for **both** the **Production** and **Preview** environments —
+   the same values from your `.env.local`:
 
    ```
    NEXT_PUBLIC_SUPABASE_URL
@@ -154,10 +157,33 @@ Next.js framework and deploys `main` on every push.
    SUPABASE_SERVICE_ROLE_KEY
    ```
 
-3. Deploy. Subsequent pushes to `main` redeploy automatically.
-
 > Without these env vars the build's static prerender fails (the Supabase
 > client requires a URL and key), so set them **before** the first deploy.
+
+### Option A — Vercel's native Git integration (simplest)
+
+Leave Vercel connected to the repo. Every push to `main` deploys to production
+and every PR gets a preview URL automatically. Nothing else to configure.
+
+### Option B — Deploy from GitHub Actions
+
+Use [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), which builds
+and deploys with the Vercel CLI: production on pushes to `main`, a preview URL on
+every PR. If you use this, **disable** Vercel's native Git integration for this
+project (Project → **Settings → Git**) to avoid double deploys.
+
+Add these three repository secrets (GitHub → **Settings → Secrets and variables
+→ Actions → New repository secret**):
+
+| Secret | Where to find it |
+| --- | --- |
+| `VERCEL_TOKEN` | vercel.com → **Account Settings → Tokens → Create** |
+| `VERCEL_ORG_ID` | Project → **Settings → General** (or `.vercel/project.json` after `vercel link`) |
+| `VERCEL_PROJECT_ID` | Project → **Settings → General** (or `.vercel/project.json` after `vercel link`) |
+
+The workflow reads the Supabase env vars from the Vercel project itself (via
+`vercel pull`), so they only need to be set in Vercel — not duplicated as GitHub
+secrets.
 
 ---
 
