@@ -117,6 +117,7 @@ export interface Route {
   total_distance_km: number | null;
   total_duration_min: number | null;
   optimized_at: string | null;
+  calendar_event_id: string | null;
   created_at: string;
   vehicle?: Vehicle | null;
   driver?: Driver | null;

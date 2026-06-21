@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { reoptimizeRoute } from "@/lib/optimize";
+import { upsertRouteCalendarEvent, deleteRouteCalendarEvent } from "@/lib/calendar";
 
 export async function createRoute(formData: FormData) {
   const supabase = await createClient();
@@ -30,6 +31,7 @@ export async function createRoute(formData: FormData) {
     .single();
 
   if (error || !data) throw new Error(error?.message ?? "Failed to create route");
+  await upsertRouteCalendarEvent(supabase, data.id);
   revalidatePath("/routes");
   redirect(`/routes/${data.id}`);
 }
@@ -59,6 +61,7 @@ export async function updateRoute(formData: FormData) {
   // Speed / start-time / toll changes affect ETAs — refresh the schedule
   // without changing the manual stop order.
   await reoptimizeRoute(supabase, id, false);
+  await upsertRouteCalendarEvent(supabase, id);
   revalidatePath(`/routes/${id}`);
 }
 
@@ -107,6 +110,7 @@ export async function addStop(formData: FormData) {
     .eq("status", "pending");
 
   await reoptimizeRoute(supabase, routeId, false);
+  await upsertRouteCalendarEvent(supabase, routeId);
   revalidatePath(`/routes/${routeId}`);
 }
 
@@ -116,6 +120,7 @@ export async function removeStop(formData: FormData) {
   const stopId = formData.get("stop_id") as string;
   await supabase.from("route_stops").delete().eq("id", stopId);
   await reoptimizeRoute(supabase, routeId, false);
+  await upsertRouteCalendarEvent(supabase, routeId);
   revalidatePath(`/routes/${routeId}`);
 }
 
@@ -142,13 +147,22 @@ export async function moveStop(formData: FormData) {
   await supabase.from("route_stops").update({ stop_order: b.stop_order }).eq("id", a.id);
   await supabase.from("route_stops").update({ stop_order: a.stop_order }).eq("id", b.id);
   await reoptimizeRoute(supabase, routeId, false);
+  await upsertRouteCalendarEvent(supabase, routeId);
   revalidatePath(`/routes/${routeId}`);
 }
 
 export async function deleteRoute(formData: FormData) {
   const supabase = await createClient();
   const id = formData.get("id") as string;
+  const { data: route } = await supabase
+    .from("routes")
+    .select("calendar_event_id")
+    .eq("id", id)
+    .single();
   await supabase.from("routes").delete().eq("id", id);
+  if (route?.calendar_event_id) {
+    await deleteRouteCalendarEvent(route.calendar_event_id);
+  }
   revalidatePath("/routes");
   redirect("/routes");
 }

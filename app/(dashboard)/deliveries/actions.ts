@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { matchZone, type ZoneLike, type GeoPoint } from "@/lib/routing";
+import { sendOutForDeliverySMS } from "@/lib/sms";
 
 interface ItemInput {
   description: string;
@@ -118,6 +119,24 @@ export async function updateOrderStatus(formData: FormData) {
       status,
       notes: note.trim(),
     });
+  }
+
+  // Send SMS when dispatcher manually marks an order out for delivery.
+  if (status === "out_for_delivery") {
+    const { data: order } = await supabase
+      .from("delivery_orders")
+      .select("contact_phone, contact_name, order_number, address_line1, city")
+      .eq("id", id)
+      .single();
+    if (order?.contact_phone) {
+      const address = [order.address_line1, order.city].filter(Boolean).join(", ");
+      await sendOutForDeliverySMS({
+        phone: order.contact_phone,
+        contactName: order.contact_name,
+        orderNumber: order.order_number,
+        address: address || null,
+      });
+    }
   }
 
   revalidatePath(`/deliveries/${id}`);

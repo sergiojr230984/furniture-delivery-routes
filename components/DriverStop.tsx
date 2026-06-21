@@ -67,6 +67,15 @@ export default function DriverStop({
       return;
     }
 
+    // Fire-and-forget SMS when driver marks the stop out for delivery.
+    if (status === "out_for_delivery") {
+      fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id }),
+      }).catch(() => {/* non-fatal */});
+    }
+
     // Record arrival/completion on the stop.
     const stopPatch: Record<string, string> = {};
     if (status === "out_for_delivery") stopPatch.arrived_at = new Date().toISOString();
