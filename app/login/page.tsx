@@ -1,91 +1,98 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Truck, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const supabase = createClient();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
 
-    try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        setError(error.message)
-      } else {
-        router.push('/dashboard')
-        router.refresh()
-      }
-    } catch {
-      setError('Could not connect. Check your internet connection and try again.')
-    } finally {
-      setLoading(false)
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
     }
+
+    // Full reload so the server picks up the new session cookie.
+    router.push("/");
+    router.refresh();
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2.5 0M13 16H9m4 0h2.586a1 1 0 00.707-.293l3.414-3.414a1 1 0 00.293-.707V9a1 1 0 00-1-1h-2m-5 8H3" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold text-slate-900">FleetView</span>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
+      <div className="card w-full max-w-sm p-8">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-white">
+            <Truck className="h-6 w-6" />
           </div>
-          <p className="text-slate-500 text-sm">Sign in to manage your delivery routes</p>
+          <h1 className="text-xl font-bold">FleetRoute</h1>
+          <p className="text-sm text-gray-500">Delivery & route management</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Email address</label>
+            <label className="label" htmlFor="email">
+              Email
+            </label>
             <input
+              id="email"
               type="email"
+              autoComplete="email"
+              required
+              className="input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-              required
+              placeholder="you@store.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+            <label className="label" htmlFor="password">
+              Password
+            </label>
             <input
+              id="password"
               type="password"
+              autoComplete="current-password"
+              required
+              className="input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
-              required
             />
           </div>
+
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </p>
           )}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-orange-600 text-white rounded-lg py-2.5 font-medium text-sm hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? 'Signing in…' : 'Sign in'}
+
+          <button type="submit" className="btn-primary w-full" disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            Sign in
           </button>
         </form>
+
+        <p className="mt-6 text-center text-xs text-gray-400">
+          Accounts are created by your dispatcher / admin.
+        </p>
       </div>
     </div>
-  )
+  );
 }

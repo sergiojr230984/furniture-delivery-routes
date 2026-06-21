@@ -1,19 +1,9 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { redirect } from "next/navigation";
+import { getProfile } from "@/lib/auth";
 
-export default async function HomePage() {
-  try {
-    const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (user) {
-      redirect('/dashboard')
-    }
-  } catch {
-    // Supabase not reachable (missing env vars) — fall through to login
-  }
-
-  redirect('/login')
+// Landing route: send drivers to the mobile view, staff to the dashboard.
+export default async function Home() {
+  const profile = await getProfile();
+  if (profile.role === "driver") redirect("/driver");
+  redirect("/dashboard");
 }
