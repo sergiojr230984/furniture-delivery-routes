@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FleetRoute — Delivery & Routes",
+  title: "La Cuevita — Delivery & Routes",
   description: "Delivery and route management for furniture retail.",
 };
 
