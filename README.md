@@ -106,15 +106,35 @@ Fill in from **Project Settings → API**:
 ```
 NEXT_PUBLIC_SUPABASE_URL="https://YOUR-PROJECT.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
-SUPABASE_SERVICE_ROLE_KEY="..."   # server-only, used to create logins
+SUPABASE_SERVICE_ROLE_KEY="..."   # server-only, used to invite/create logins
+NEXT_PUBLIC_SITE_URL="https://your-app.vercel.app"   # used in invite emails
 ```
 
-### 4. Create the first admin
+`NEXT_PUBLIC_SITE_URL` can be left blank on Vercel (it falls back to the
+deployment's own URL) but should be set explicitly once you're on a real
+domain, so invite links don't point at a stale preview URL.
 
-New sign-ups default to the `salesperson` role. To bootstrap an admin:
+### 4. Allow the invite link in Supabase Auth
 
-1. Supabase dashboard → **Authentication → Users → Add user** (set email + password,
-   tick *Auto confirm*).
+Staff invites use Supabase's built-in invite email, which redirects back into
+this app to let the person set their password. Add that redirect in the
+dashboard → **Authentication → URL Configuration**:
+
+- **Site URL**: your app's URL (e.g. `https://your-app.vercel.app`)
+- **Redirect URLs**: add `https://your-app.vercel.app/auth/callback` (and
+  `http://localhost:3000/auth/callback` for local dev)
+
+Supabase's default invite email template works out of the box — no SMTP setup
+required for low volume (their shared mailer). For production-grade delivery,
+configure a **Custom SMTP** provider under **Authentication → Emails**.
+
+### 5. Create the first admin
+
+New logins default to the `salesperson` role. To bootstrap the first admin:
+
+1. Supabase dashboard → **Authentication → Users → Add user** (set email +
+   password, tick *Auto confirm*) — this one-time step is done manually since
+   no admin exists yet to send an invite.
 2. Then in **SQL Editor**:
 
    ```sql
@@ -122,10 +142,11 @@ New sign-ups default to the `salesperson` role. To bootstrap an admin:
    where email = 'you@store.com';
    ```
 
-After that, the admin can create every other login from the **Staff & users**
-screen, and driver logins from the **Drivers** screen.
+After that, the admin invites every other login from the **Staff & users**
+screen (they get an email to set their own password), and driver logins from
+the **Drivers** screen.
 
-### 5. Run it
+### 6. Run it
 
 ```bash
 npm install

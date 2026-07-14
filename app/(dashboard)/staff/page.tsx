@@ -3,7 +3,7 @@ import { UserPlus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/auth";
 import { ROLES, ROLE_LABELS } from "@/lib/constants";
-import { createStaff, updateRole } from "./actions";
+import { inviteStaff, updateRole } from "./actions";
 import type { Profile } from "@/lib/types";
 
 export default async function StaffPage() {
@@ -21,9 +21,9 @@ export default async function StaffPage() {
     <div className="space-y-5">
       <h1 className="text-2xl font-bold">Staff & users</h1>
 
-      {/* Create login */}
-      <form action={createStaff} className="card grid gap-4 p-5 sm:grid-cols-4">
-        <h2 className="text-lg font-semibold sm:col-span-4">Create a login</h2>
+      {/* Invite login */}
+      <form action={inviteStaff} className="card grid gap-4 p-5 sm:grid-cols-3">
+        <h2 className="text-lg font-semibold sm:col-span-3">Invite someone</h2>
         <div>
           <label className="label">Full name</label>
           <input name="full_name" className="input" />
@@ -33,10 +33,6 @@ export default async function StaffPage() {
           <input name="email" type="email" required className="input" />
         </div>
         <div>
-          <label className="label">Password *</label>
-          <input name="password" type="text" required className="input" placeholder="min 6 chars" />
-        </div>
-        <div>
           <label className="label">Role</label>
           <select name="role" className="input" defaultValue="salesperson">
             {ROLES.map((r) => (
@@ -44,10 +40,13 @@ export default async function StaffPage() {
             ))}
           </select>
         </div>
-        <div className="sm:col-span-4">
+        <div className="sm:col-span-3">
           <button type="submit" className="btn-primary">
-            <UserPlus className="h-4 w-4" /> Create login
+            <UserPlus className="h-4 w-4" /> Send invite
           </button>
+          <p className="mt-2 text-xs text-gray-400">
+            They'll get an email with a link to set their own password.
+          </p>
         </div>
       </form>
 
