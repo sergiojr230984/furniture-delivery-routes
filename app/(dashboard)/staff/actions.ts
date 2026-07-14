@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { siteUrl } from "@/lib/site-url";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -18,21 +19,19 @@ async function assertAdmin() {
   if (!profile || profile.role !== "admin") throw new Error("Not authorized");
 }
 
-// Creates a login for a staff member (admin / manager / salesperson / driver).
-export async function createStaff(formData: FormData) {
+// Invites a staff member (admin / manager / salesperson / driver) by email.
+// They receive a Supabase invite email and set their own password.
+export async function inviteStaff(formData: FormData) {
   await assertAdmin();
   const admin = createAdminClient();
 
   const email = (formData.get("email") as string)?.trim();
-  const password = (formData.get("password") as string)?.trim();
   const fullName = (formData.get("full_name") as string)?.trim();
   const role = (formData.get("role") as string) || "salesperson";
 
-  const { error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { full_name: fullName, role },
+  const { error } = await admin.auth.admin.inviteUserByEmail(email, {
+    data: { full_name: fullName, role },
+    redirectTo: `${siteUrl()}/auth/callback?next=/auth/set-password`,
   });
   if (error) throw new Error(error.message);
 
