@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { matchZone, type ZoneLike, type GeoPoint } from "@/lib/routing";
-import { sendOutForDeliverySMS } from "@/lib/sms";
+import { sendOutForDeliveryWhatsApp } from "@/lib/whatsapp";
 
 interface ItemInput {
   description: string;
@@ -121,7 +121,7 @@ export async function updateOrderStatus(formData: FormData) {
     });
   }
 
-  // Send SMS when dispatcher manually marks an order out for delivery.
+  // WhatsApp the customer when a dispatcher manually marks an order out for delivery.
   if (status === "out_for_delivery") {
     const { data: order } = await supabase
       .from("delivery_orders")
@@ -130,7 +130,7 @@ export async function updateOrderStatus(formData: FormData) {
       .single();
     if (order?.contact_phone) {
       const address = [order.address_line1, order.city].filter(Boolean).join(", ");
-      await sendOutForDeliverySMS({
+      await sendOutForDeliveryWhatsApp({
         phone: order.contact_phone,
         contactName: order.contact_name,
         orderNumber: order.order_number,

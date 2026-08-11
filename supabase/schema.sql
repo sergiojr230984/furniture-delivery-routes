@@ -205,6 +205,7 @@ create table if not exists public.delivery_orders (
   salesperson_id     uuid references public.profiles(id),
   notes              text,
   created_by         uuid references public.profiles(id),
+  whatsapp_reminder_sent_at timestamptz,
   created_at         timestamptz not null default now(),
   updated_at         timestamptz not null default now()
 );

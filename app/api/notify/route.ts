@@ -1,9 +1,10 @@
 // Called by the driver's mobile client after marking a stop "out for delivery".
-// Fetches order details server-side and sends the customer an SMS.
+// Fetches order details server-side and WhatsApps the customer (no-ops if
+// the WhatsApp env vars aren't configured).
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { sendOutForDeliverySMS } from "@/lib/sms";
+import { sendOutForDeliveryWhatsApp } from "@/lib/whatsapp";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   const address = [order.address_line1, order.city].filter(Boolean).join(", ");
 
-  await sendOutForDeliverySMS({
+  await sendOutForDeliveryWhatsApp({
     phone: order.contact_phone,
     contactName: order.contact_name,
     orderNumber: order.order_number,
