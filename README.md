@@ -31,6 +31,10 @@ Built with **Next.js (App Router) · TypeScript · Tailwind CSS · Supabase**
 - Upload proof-of-delivery photos (camera capture on mobile)
 - Capture customer signature on a canvas
 - Delivery notes
+- Automatic customer notifications by SMS and **WhatsApp** (Meta Business
+  Cloud API): a "delivery is tomorrow" reminder sent by a daily cron, and an
+  "on the way" message the moment a driver marks a stop out for delivery
+  (see [`lib/whatsapp.ts`](lib/whatsapp.ts))
 
 **Statuses:** Pending · Scheduled · Loaded · Out for Delivery · Delivered ·
 Failed · Rescheduled
@@ -94,6 +98,8 @@ vans, crew, customers, a depot, a zone and an on-demand order.
 > Already have an earlier version of the database? Run
 > [`supabase/upgrade_routing.sql`](supabase/upgrade_routing.sql) instead — it adds
 > the routing tables, coordinates, constraints and ETA columns idempotently.
+> If your database predates the WhatsApp reminder tracking column, also run
+> [`supabase/add_whatsapp_reminder.sql`](supabase/add_whatsapp_reminder.sql).
 
 ### 3. Configure environment
 
@@ -207,6 +213,8 @@ app/
     stops/[id]/       # proof-of-delivery: status, photo, signature, notes
   login/              # email/password sign-in
   auth/signout/       # sign-out route handler
+  api/notify/         # SMS + WhatsApp "out for delivery" notice
+  api/cron/           # daily WhatsApp "delivery tomorrow" reminder job
 components/           # UI + client widgets (forms, signature pad, etc.)
 lib/
   supabase/           # browser / server / middleware / admin clients
@@ -215,11 +223,16 @@ lib/
   constants.ts        # statuses, roles, labels, colours
   types.ts            # row types
   auth.ts             # getProfile() + role helpers
+  sms.ts              # Twilio SMS notifications
+  whatsapp.ts          # WhatsApp (Meta Cloud API) notifications
+  calendar.ts          # Google Calendar route sync
 supabase/
-  schema.sql           # full schema + RLS + storage (routing + tracking incl.)
-  upgrade_routing.sql  # idempotent upgrade (routing + tracking) for existing DBs
-  upgrade_tracking.sql # tracking-only upgrade
-  seed.sql             # optional sample data
+  schema.sql                  # full schema + RLS + storage (routing + tracking incl.)
+  upgrade_routing.sql         # idempotent upgrade (routing + tracking) for existing DBs
+  upgrade_tracking.sql        # tracking-only upgrade
+  add_calendar_event_id.sql   # adds routes.calendar_event_id
+  add_whatsapp_reminder.sql   # adds delivery_orders.whatsapp_reminder_sent_at
+  seed.sql                    # optional sample data
 ```
 
 ## Deploying

@@ -97,6 +97,7 @@ export interface DeliveryOrder {
   service_minutes: number | null;
   zone_id: string | null;
   sla_deadline: string | null;
+  whatsapp_reminder_sent_at: string | null;
   created_at: string;
   // optional joined relations
   customer?: Customer | null;
