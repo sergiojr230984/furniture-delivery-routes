@@ -31,9 +31,9 @@ Built with **Next.js (App Router) · TypeScript · Tailwind CSS · Supabase**
 - Upload proof-of-delivery photos (camera capture on mobile)
 - Capture customer signature on a canvas
 - Delivery notes
-- Automatic customer notifications by SMS and **WhatsApp** (Meta Business
-  Cloud API): a "delivery is tomorrow" reminder sent by a daily cron, and an
-  "on the way" message the moment a driver marks a stop out for delivery
+- Automatic customer **WhatsApp** notifications (Meta Business Cloud API): a
+  "delivery is tomorrow" reminder sent by a daily cron, and an "on the way"
+  message the moment a driver (or dispatcher) marks a stop out for delivery
   (see [`lib/whatsapp.ts`](lib/whatsapp.ts))
 
 **Statuses:** Pending · Scheduled · Loaded · Out for Delivery · Delivered ·
@@ -213,7 +213,7 @@ app/
     stops/[id]/       # proof-of-delivery: status, photo, signature, notes
   login/              # email/password sign-in
   auth/signout/       # sign-out route handler
-  api/notify/         # SMS + WhatsApp "out for delivery" notice
+  api/notify/         # WhatsApp "out for delivery" notice
   api/cron/           # daily WhatsApp "delivery tomorrow" reminder job
 components/           # UI + client widgets (forms, signature pad, etc.)
 lib/
@@ -223,7 +223,6 @@ lib/
   constants.ts        # statuses, roles, labels, colours
   types.ts            # row types
   auth.ts             # getProfile() + role helpers
-  sms.ts              # Twilio SMS notifications
   whatsapp.ts          # WhatsApp (Meta Cloud API) notifications
   calendar.ts          # Google Calendar route sync
 supabase/
