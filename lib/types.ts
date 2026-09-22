@@ -1,201 +1,345 @@
-// Hand-written row types for the tables we read/write in the app.
+// Hand-written row types for the tables the app reads/writes.
 import type {
-  DeliveryStatus,
-  VehicleStatus,
-  RouteStatus,
-  OrderType,
-  CrewType,
+  OrgType,
   Role,
+  BookingStatus,
+  ServiceLevel,
+  PickupType,
+  ItemCategory,
+  PackagingCondition,
+  OfferStatus,
+  AssignmentStatus,
+  PaymentStatus,
+  PayoutStatus,
+  LedgerEntryType,
+  ClaimStatus,
+  DocumentStatus,
+  WarehouseCollectionStatus,
 } from "./constants";
 
-export interface Profile {
+export interface Organization {
   id: string;
-  full_name: string | null;
-  email: string | null;
-  phone: string | null;
-  role: Role;
-  active: boolean;
-  created_at: string;
-}
-
-export interface Customer {
-  id: string;
+  type: OrgType;
   name: string;
-  phone: string | null;
-  email: string | null;
-  address_line1: string | null;
-  address_line2: string | null;
-  city: string | null;
-  state: string | null;
-  postal_code: string | null;
-  notes: string | null;
-  created_at: string;
-}
-
-export interface Vehicle {
-  id: string;
-  name: string;
-  make: string | null;
-  model: string | null;
-  year: number | null;
-  license_plate: string | null;
-  capacity_volume: number | null;
-  capacity_weight: number | null;
-  status: VehicleStatus;
-  notes: string | null;
-  avg_speed_kmh: number;
-  max_stops: number | null;
-  avoid_tolls: boolean;
-  created_at: string;
-}
-
-export interface Driver {
-  id: string;
-  profile_id: string | null;
-  full_name: string;
-  phone: string | null;
-  license_number: string | null;
-  crew_type: CrewType;
-  active: boolean;
-  notes: string | null;
-  created_at: string;
-}
-
-export interface DeliveryItem {
-  id: string;
-  delivery_order_id: string;
-  description: string;
-  sku: string | null;
-  quantity: number;
-  weight: number | null;
-  volume: number | null;
-  notes: string | null;
-}
-
-export interface DeliveryOrder {
-  id: string;
-  order_number: string | null;
-  order_type: OrderType;
-  customer_id: string | null;
-  status: DeliveryStatus;
-  scheduled_date: string | null;
-  time_window_start: string | null;
-  time_window_end: string | null;
-  contact_name: string | null;
+  is_internal_fleet: boolean;
+  is_demo: boolean;
+  status: "active" | "pending_review" | "suspended" | "rejected";
+  locale_default: string;
+  contact_email: string | null;
   contact_phone: string | null;
-  address_line1: string | null;
+  service_area_notes: string | null;
+  contribution_floor_amount: string | null;
+  created_at: string;
+}
+
+export interface User {
+  id: string;
+  org_id: string;
+  role: Role;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  locale: string;
+  active: boolean;
+  created_at: string;
+}
+
+export interface RetailerLocation {
+  id: string;
+  org_id: string;
+  name: string;
+  address_line1: string;
   address_line2: string | null;
-  city: string | null;
-  state: string | null;
-  postal_code: string | null;
-  priority: number;
-  salesperson_id: string | null;
-  notes: string | null;
+  city: string;
+  state: string;
+  postal_code: string;
   latitude: number | null;
   longitude: number | null;
-  on_demand: boolean;
-  service_minutes: number | null;
-  zone_id: string | null;
-  sla_deadline: string | null;
-  created_at: string;
-  // optional joined relations
-  customer?: Customer | null;
-  delivery_items?: DeliveryItem[];
-}
-
-export interface Route {
-  id: string;
-  name: string;
-  route_date: string;
-  vehicle_id: string | null;
-  driver_id: string | null;
-  helper_id: string | null;
-  status: RouteStatus;
-  notes: string | null;
-  start_time: string;
-  avoid_tolls: boolean;
-  total_distance_km: number | null;
-  total_duration_min: number | null;
-  optimized_at: string | null;
-  calendar_event_id: string | null;
-  created_at: string;
-  vehicle?: Vehicle | null;
-  driver?: Driver | null;
-  helper?: Driver | null;
-}
-
-export interface RouteStop {
-  id: string;
-  route_id: string;
-  delivery_order_id: string;
-  stop_order: number;
-  stop_type: OrderType;
-  arrived_at: string | null;
-  completed_at: string | null;
-  notes: string | null;
-  eta: string | null;
-  planned_service_minutes: number | null;
-  distance_from_prev_km: number | null;
-  predicted_delay_min: number;
-  delivery_order?: DeliveryOrder | null;
-}
-
-export interface DeliveryZone {
-  id: string;
-  name: string;
-  color: string;
-  center_lat: number | null;
-  center_lng: number | null;
-  radius_km: number | null;
-  postal_prefixes: string[];
+  is_default: boolean;
   active: boolean;
-  created_at: string;
 }
 
-export interface DriverLocation {
-  driver_id: string;
-  route_id: string | null;
-  latitude: number;
-  longitude: number;
-  accuracy: number | null;
-  heading: number | null;
-  speed: number | null;
-  updated_at: string;
-  driver?: Driver | null;
-}
-
-export interface OrgSettings {
-  id: number;
-  depot_name: string | null;
-  depot_address: string | null;
-  depot_lat: number | null;
-  depot_lng: number | null;
-  default_service_minutes: number;
-  default_avg_speed_kmh: number;
-}
-
-export interface DeliveryPhoto {
+export interface BellizaWarehouse {
   id: string;
-  delivery_order_id: string;
-  route_stop_id: string | null;
-  storage_path: string;
-  caption: string | null;
-  created_at: string;
+  name: string;
+  address_line1: string;
+  city: string;
+  state: string;
+  postal_code: string;
 }
 
-export interface DeliverySignature {
+export interface SavedProduct {
   id: string;
-  delivery_order_id: string;
-  signer_name: string | null;
-  storage_path: string;
-  signed_at: string;
+  org_id: string;
+  name: string;
+  category: ItemCategory;
+  length_in: string | null;
+  width_in: string | null;
+  height_in: string | null;
+  weight_lbs: string | null;
+  default_assembly_required: boolean;
+  photo_path: string | null;
 }
 
-export interface StatusHistoryEntry {
+export interface ProviderVehicle {
   id: string;
-  delivery_order_id: string;
-  status: DeliveryStatus;
+  org_id: string;
+  name: string;
+  vehicle_type: string;
+  cargo_length_in: string | null;
+  cargo_width_in: string | null;
+  cargo_height_in: string | null;
+  door_width_in: string | null;
+  payload_lbs: string;
+  max_jobs_per_day: number;
+  status: string;
+  license_plate: string | null;
   notes: string | null;
-  changed_by: string | null;
+}
+
+export interface CrewMember {
+  id: string;
+  org_id: string;
+  user_id: string | null;
+  full_name: string;
+  phone: string | null;
+  can_assemble: boolean;
+  active: boolean;
+}
+
+export interface ProviderDocument {
+  id: string;
+  org_id: string;
+  doc_type: string;
+  file_path: string;
+  issued_at: string | null;
+  expires_at: string | null;
+  status: DocumentStatus;
+  review_notes: string | null;
   created_at: string;
+}
+
+export interface PricingRuleSet {
+  id: string;
+  version: number;
+  label: string;
+  status: "draft" | "active" | "archived";
+  config: PricingConfig;
+  created_at: string;
+  activated_at: string | null;
+}
+
+export interface PricingConfig {
+  currency: string;
+  minimum_charge: number;
+  base_miles_included: number;
+  per_mile_rate: number;
+  category_rates: Partial<Record<ItemCategory, number>>;
+  per_extra_item_rate: number;
+  two_person_crew_fee: number;
+  stairs_fee_per_flight: number;
+  assembly_fee_per_item: number;
+  priority_fee: number;
+  dedicated_service_fee: number;
+  waiting_rate_per_15min: number;
+  extra_stop_fee: number;
+  failed_delivery_fee: number;
+  debris_removal_fee: number;
+  old_furniture_removal_fee: number;
+  service_level_multipliers: Record<ServiceLevel, number>;
+  provider_payout_percent: number; // % of retailer price paid to provider before adjustments
+  processing_fee_percent: number; // card processing estimate
+  variable_support_claims_percent: number; // estimated variable support/claims cost, for contribution
+  retailer_discounts: Record<string, number>; // retailer_org_id -> percent off
+}
+
+export interface Booking {
+  id: string;
+  booking_number: string;
+  retailer_org_id: string;
+  retailer_location_id: string | null;
+  created_by: string | null;
+  status: BookingStatus;
+  mode: "internal" | "marketplace";
+  service_level: ServiceLevel;
+  priority: boolean;
+  debris_removal: boolean;
+  old_furniture_removal: boolean;
+  window_date: string | null;
+  window_start: string | null;
+  window_end: string | null;
+  pricing_rule_set_id: string | null;
+  quote: QuoteBreakdown | null;
+  price_total: string | null;
+  currency: string;
+  cancellation_terms: string | null;
+  internal_notes: string | null;
+  is_demo: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuoteBreakdown {
+  currency: string;
+  lineItems: { label: string; amount: number }[];
+  subtotal: number;
+  discountPercent: number;
+  discountAmount: number;
+  total: number;
+  providerPayout: number;
+  processingFeeEstimate: number;
+  needsReview: boolean;
+  reviewReasons: string[];
+  ruleSetVersion: number;
+}
+
+export interface BookingPickup {
+  id: string;
+  booking_id: string;
+  sequence: number;
+  pickup_type: PickupType;
+  location_id: string | null;
+  warehouse_id: string | null;
+  warehouse_order_number: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  city: string | null;
+  state: string | null;
+  postal_code: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  contact_name: string | null;
+  contact_phone: string | null;
+  floor: number | null;
+  stairs_flights: number;
+  elevator_available: boolean;
+  parking_notes: string | null;
+  instructions: string | null;
+}
+
+export interface BookingItem {
+  id: string;
+  booking_id: string;
+  saved_product_id: string | null;
+  name: string;
+  category: ItemCategory;
+  quantity: number;
+  length_in: string | null;
+  width_in: string | null;
+  height_in: string | null;
+  weight_lbs: string | null;
+  dims_unknown: boolean;
+  photos: string[];
+  declared_value: string | null;
+  packaging_condition: PackagingCondition;
+  assembly_required: boolean;
+  needs_review: boolean;
+  review_reason: string | null;
+}
+
+export interface BookingDestination {
+  booking_id: string;
+  customer_name: string | null;
+  customer_phone: string | null;
+  customer_email: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  city: string | null;
+  state: string | null;
+  postal_code: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  floor: number | null;
+  stairs_flights: number;
+  elevator_available: boolean;
+  elevator_reserved: boolean;
+  building_hours: string | null;
+  parking_notes: string | null;
+  walking_distance_ft: number | null;
+  instructions: string | null;
+  access_completed: boolean;
+  access_token: string | null;
+  access_token_expires_at: string | null;
+}
+
+export interface Offer {
+  id: string;
+  booking_id: string;
+  provider_org_id: string;
+  payout_amount: string;
+  scope: Record<string, unknown>;
+  status: OfferStatus;
+  expires_at: string;
+  created_at: string;
+  responded_at: string | null;
+}
+
+export interface Assignment {
+  id: string;
+  booking_id: string;
+  provider_org_id: string;
+  vehicle_id: string | null;
+  route_id: string | null;
+  status: AssignmentStatus;
+  offer_id: string | null;
+  override_reason: string | null;
+  created_at: string;
+}
+
+export interface Payment {
+  id: string;
+  booking_id: string;
+  provider: string;
+  stripe_payment_intent_id: string | null;
+  amount: string;
+  currency: string;
+  status: PaymentStatus;
+  is_demo: boolean;
+  failure_reason: string | null;
+}
+
+export interface Payout {
+  id: string;
+  assignment_id: string;
+  provider_org_id: string;
+  amount: string;
+  status: PayoutStatus;
+  is_demo: boolean;
+  held_reason: string | null;
+  paid_at: string | null;
+}
+
+export interface LedgerEntry {
+  id: string;
+  entry_type: LedgerEntryType;
+  booking_id: string | null;
+  org_id: string | null;
+  amount: string;
+  currency: string;
+  is_demo: boolean;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface Claim {
+  id: string;
+  booking_id: string;
+  status: ClaimStatus;
+  description: string;
+  requested_amount: string | null;
+  decision_notes: string | null;
+  adjustment_amount: string | null;
+  created_at: string;
+}
+
+export interface WarehouseCollectionAppointment {
+  id: string;
+  retailer_org_id: string;
+  order_number: string;
+  scheduled_at: string;
+  driver_name: string | null;
+  driver_phone: string | null;
+  vehicle_plate: string | null;
+  status: WarehouseCollectionStatus;
+  notes: string | null;
 }
