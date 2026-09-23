@@ -10,7 +10,7 @@ import {
   reportIssueAction,
 } from "./actions";
 import SignatureCapture from "@/components/SignatureCapture";
-import { signedFileUrl } from "@/lib/storage";
+import { signedFileUrls } from "@/lib/storage";
 import type { AssignmentStatus } from "@/lib/constants";
 import type { Booking, BookingDestination, BookingItem, BookingPickup } from "@/lib/types";
 
@@ -44,6 +44,9 @@ export default async function CrewJobDetailPage({
   const status = assignment.status;
   const navLink = (addr: string | null, city: string | null) =>
     addr ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${addr}, ${city ?? ""}`)}` : "#";
+
+  const photoKeys = evidence.filter((e) => e.kind === "photo" && e.file_path).map((e) => e.file_path!);
+  const photoUrls = await signedFileUrls(photoKeys);
 
   return (
     <div className="space-y-4 pb-10">
@@ -84,7 +87,7 @@ export default async function CrewJobDetailPage({
       {status === "arrived_pickup" && (
         <div className="card space-y-4 p-4">
           <h2 className="font-semibold text-navy-800">Pickup condition</h2>
-          <EvidencePhotos evidence={evidence} stage="pickup_condition" />
+          <EvidencePhotos evidence={evidence} stage="pickup_condition" urls={photoUrls} />
           <form action={uploadPhotoAction.bind(null, assignmentId, "pickup_condition")} className="space-y-2">
             <input type="file" name="file" accept="image/*" capture="environment" required className="input" />
             <input type="text" name="caption" placeholder="Note any existing damage (optional)" className="input" />
@@ -169,7 +172,7 @@ export default async function CrewJobDetailPage({
           )}
 
           <h2 className="font-semibold text-navy-800">Completion photos</h2>
-          <EvidencePhotos evidence={evidence} stage="delivery_completed" />
+          <EvidencePhotos evidence={evidence} stage="delivery_completed" urls={photoUrls} />
           <form action={uploadPhotoAction.bind(null, assignmentId, "delivery_completed")} className="space-y-2">
             <input type="file" name="file" accept="image/*" capture="environment" required className="input" />
             <button type="submit" className="btn-secondary w-full">
@@ -210,9 +213,11 @@ export default async function CrewJobDetailPage({
 function EvidencePhotos({
   evidence,
   stage,
+  urls,
 }: {
   evidence: { id: string; stage: string; kind: string; file_path: string | null }[];
   stage: string;
+  urls: Record<string, string>;
 }) {
   const photos = evidence.filter((e) => e.stage === stage && e.kind === "photo" && e.file_path);
   if (photos.length === 0) return null;
@@ -220,7 +225,7 @@ function EvidencePhotos({
     <div className="flex gap-2 overflow-x-auto">
       {photos.map((p) => (
         // eslint-disable-next-line @next/next/no-img-element
-        <img key={p.id} src={signedFileUrl(p.file_path!)} alt="" className="h-20 w-20 rounded-lg object-cover" />
+        <img key={p.id} src={urls[p.file_path!]} alt="" className="h-20 w-20 rounded-lg object-cover" />
       ))}
     </div>
   );

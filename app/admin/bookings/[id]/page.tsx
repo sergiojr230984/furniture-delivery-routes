@@ -3,7 +3,7 @@ import { query, queryOne } from "@/lib/db";
 import StatusBadge from "@/components/StatusBadge";
 import { formatMoney } from "@/lib/money";
 import { formatDateTime, formatWallTime } from "@/lib/time";
-import { signedFileUrl } from "@/lib/storage";
+import { signedFileUrls } from "@/lib/storage";
 import type { Booking, BookingDestination, BookingItem, BookingPickup } from "@/lib/types";
 
 export default async function AdminBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -48,6 +48,9 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
   const payments = await query<{ status: string; amount: string; is_demo: boolean }>(
     `select status, amount, is_demo from payments where booking_id = $1`,
     [id]
+  );
+  const evidenceUrls = await signedFileUrls(
+    evidence.filter((e) => (e.kind === "photo" || e.kind === "signature") && e.file_path).map((e) => e.file_path!)
   );
 
   return (
@@ -164,7 +167,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
               .map((e) =>
                 e.file_path ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img key={e.id} src={signedFileUrl(e.file_path)} alt={e.stage} className="h-20 w-20 rounded-lg object-cover" title={e.stage} />
+                  <img key={e.id} src={evidenceUrls[e.file_path]} alt={e.stage} className="h-20 w-20 rounded-lg object-cover" title={e.stage} />
                 ) : null
               )}
           </div>

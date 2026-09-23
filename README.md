@@ -30,10 +30,15 @@ and points at any managed Postgres (Neon, RDS, Supabase-as-just-a-Postgres,
 etc.) for production by changing one connection string.
 
 Other notable choices:
-- **File storage**: private local disk (`.data/uploads`, gitignored),
-  served only through a route handler requiring a signed, time-limited
-  token (`lib/storage.ts`). Swap for S3/Supabase Storage in production —
-  callers only touch `saveFile` / `readStoredFile` / `signedFileUrl`.
+- **File storage**: local disk (`.data/uploads`, gitignored) behind a
+  signed short-lived token when no cloud bucket is configured — a complete
+  demo needs zero cloud credentials. Set `R2_ACCOUNT_ID` /
+  `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET_NAME` (Cloudflare
+  R2, or any S3-compatible bucket) and `lib/storage.ts` automatically
+  switches to private-bucket storage with presigned GET URLs minted on
+  demand — same "never a public link, always app-gated" model either way,
+  and this is the mode required for any serverless deploy (Vercel
+  functions have no persistent disk).
 - **Payments**: `stripe` (test mode) when `STRIPE_SECRET_KEY` is set,
   otherwise an in-app demo adapter that never calls out to a real payment
   network (`lib/payments.ts`).
@@ -206,6 +211,7 @@ a real charge, payout, or message:
 | Email | Same outbox, `status: demo_sent` | Wire an SMTP client into `lib/notify.ts`'s `tryEmail` (stubbed to return `false`) |
 | Map view | List/calendar views only, banner explains why | Set `NEXT_PUBLIC_MAPBOX_TOKEN` and add a map component (not built) |
 | Geocoding | None — distance falls back to a flat estimate, noted as a line item | Add a geocoding call when saving pickup/destination addresses |
+| File storage | Local disk (fine for a single-server demo, not for serverless) | Set `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET_NAME` — required before deploying anywhere without persistent disk |
 
 ## Known limitations / not implemented
 
@@ -306,14 +312,14 @@ tests/
 
 ## Deployment
 
-No CI/CD or hosting config is included on purpose. This build stores
-uploaded files on local disk and expects a long-lived Postgres connection
-— both are incompatible with a serverless/ephemeral host as-is, and the
-task explicitly calls for not deploying publicly or activating real
-payments/messages automatically. To deploy for real: point `DATABASE_URL`
-at a managed Postgres, replace `lib/storage.ts` with an S3-compatible
-client, set the real Stripe/Twilio credentials, and set `APP_MODE` to
-`pilot` or `marketplace` deliberately.
+No CI/CD or hosting config is included on purpose — the task explicitly
+calls for not deploying publicly or activating real payments/messages
+automatically. To deploy for real: point `DATABASE_URL` at a managed
+Postgres, set the four `R2_*` variables (or any S3-compatible bucket —
+`lib/storage.ts` needs no further code change, it detects them
+automatically) so uploaded files survive a serverless/ephemeral host, set
+real Stripe/Twilio credentials, and set `APP_MODE` to `pilot` or
+`marketplace` deliberately.
 
 ## Environment variables
 
