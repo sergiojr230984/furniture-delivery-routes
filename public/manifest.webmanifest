@@ -1,0 +1,12 @@
+{
+  "name": "Belliza Delivery",
+  "short_name": "Belliza",
+  "description": "Book, track and dispatch furniture deliveries.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#152a5a",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

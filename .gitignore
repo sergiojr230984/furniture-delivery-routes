@@ -29,3 +29,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# local private file storage (proof-of-delivery photos, signatures, provider docs)
+/.data/

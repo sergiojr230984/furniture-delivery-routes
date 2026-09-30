@@ -1,5 +1,5 @@
 {
-  "name": "furniture-delivery-routes",
+  "name": "belliza-delivery",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -7,26 +7,36 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "tsx db/migrate.ts",
+    "db:seed": "tsx db/seed.ts",
+    "db:reset": "tsx db/migrate.ts --reset && tsx db/seed.ts",
+    "db:test:setup": "DATABASE_URL=\"${TEST_DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/belliza_test}\" tsx db/migrate.ts --reset && DATABASE_URL=\"${TEST_DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/belliza_test}\" tsx db/seed.ts",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.45.4",
+    "@aws-sdk/client-s3": "^3.1138.0",
+    "@aws-sdk/s3-request-presigner": "^3.1138.0",
     "date-fns": "^4.1.0",
-    "googleapis": "^173.0.0",
     "lucide-react": "^0.468.0",
     "next": "^15.0.4",
+    "pg": "^8.13.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "twilio": "^6.0.2"
+    "stripe": "^17.5.0",
+    "twilio": "^6.0.2",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.2"
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }
