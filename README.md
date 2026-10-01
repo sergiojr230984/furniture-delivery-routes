@@ -42,10 +42,14 @@ Other notable choices:
 - **Payments**: `stripe` (test mode) when `STRIPE_SECRET_KEY` is set,
   otherwise an in-app demo adapter that never calls out to a real payment
   network (`lib/payments.ts`).
-- **Notifications**: Twilio SMS when configured, otherwise every
-  notification is recorded in a `notifications_outbox` table with a
-  dedupe key, visible at **Admin → Notifications** (`lib/notify.ts`). No
-  email provider is wired up by default (SMTP hook is stubbed).
+- **Notifications**: WhatsApp (Meta Business Cloud API) when configured —
+  preferred over SMS for this market — falling back to Twilio SMS, and
+  otherwise every notification is recorded in a `notifications_outbox`
+  table with a dedupe key, visible at **Admin → Notifications**
+  (`lib/notify.ts`). Covers booking confirmed, out for delivery, delivered,
+  exceptions, and a day-before reminder sent by a daily Vercel Cron
+  (`app/api/cron/day-before-reminders`, see `vercel.json`). No email
+  provider is wired up by default (SMTP hook is stubbed).
 - **Routing**: a transparent nearest-neighbour + 2-opt heuristic
   (`lib/routing.ts`, carried over from the original app) — no external
   maps/geocoding API, no claim of "AI-optimized" routing.
@@ -207,6 +211,7 @@ a real charge, payout, or message:
 | Integration | Demo behavior | To go live |
 | --- | --- | --- |
 | Payments | Records a `demo_recorded` payment/ledger entry | Set `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` (Stripe test mode supported end to end, manual-capture PaymentIntents, webhook signature verification + idempotent event log) |
+| WhatsApp | Written to `notifications_outbox`, visible at Admin → Notifications (preferred over SMS whenever configured) | Set `WHATSAPP_ACCESS_TOKEN` / `WHATSAPP_PHONE_NUMBER_ID`, plus the `WHATSAPP_TEMPLATE_*` names for your approved Meta Message Templates |
 | SMS | Written to `notifications_outbox`, visible at Admin → Notifications | Set `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` |
 | Email | Same outbox, `status: demo_sent` | Wire an SMTP client into `lib/notify.ts`'s `tryEmail` (stubbed to return `false`) |
 | Map view | List/calendar views only, banner explains why | Set `NEXT_PUBLIC_MAPBOX_TOKEN` and add a map component (not built) |
