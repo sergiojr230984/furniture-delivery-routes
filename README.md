@@ -42,10 +42,14 @@ Other notable choices:
 - **Payments**: `stripe` (test mode) when `STRIPE_SECRET_KEY` is set,
   otherwise an in-app demo adapter that never calls out to a real payment
   network (`lib/payments.ts`).
-- **Notifications**: Twilio SMS when configured, otherwise every
-  notification is recorded in a `notifications_outbox` table with a
-  dedupe key, visible at **Admin → Notifications** (`lib/notify.ts`). No
-  email provider is wired up by default (SMTP hook is stubbed).
+- **Notifications**: WhatsApp (Meta Business Cloud API) when configured —
+  preferred over SMS for this market — falling back to Twilio SMS, and
+  otherwise every notification is recorded in a `notifications_outbox`
+  table with a dedupe key, visible at **Admin → Notifications**
+  (`lib/notify.ts`). Covers booking confirmed, out for delivery, delivered,
+  exceptions, and a day-before reminder sent by a daily Vercel Cron
+  (`app/api/cron/day-before-reminders`, see `vercel.json`). No email
+  provider is wired up by default (SMTP hook is stubbed).
 - **Routing**: a transparent nearest-neighbour + 2-opt heuristic
   (`lib/routing.ts`, carried over from the original app) — no external
   maps/geocoding API, no claim of "AI-optimized" routing.
@@ -207,6 +211,7 @@ a real charge, payout, or message:
 | Integration | Demo behavior | To go live |
 | --- | --- | --- |
 | Payments | Records a `demo_recorded` payment/ledger entry | Set `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` (Stripe test mode supported end to end, manual-capture PaymentIntents, webhook signature verification + idempotent event log) |
+| WhatsApp | Written to `notifications_outbox`, visible at Admin → Notifications (preferred over SMS whenever configured) | Set `WHATSAPP_ACCESS_TOKEN` / `WHATSAPP_PHONE_NUMBER_ID`, plus the `WHATSAPP_TEMPLATE_*` names for your approved Meta Message Templates |
 | SMS | Written to `notifications_outbox`, visible at Admin → Notifications | Set `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` |
 | Email | Same outbox, `status: demo_sent` | Wire an SMTP client into `lib/notify.ts`'s `tryEmail` (stubbed to return `false`) |
 | Map view | List/calendar views only, banner explains why | Set `NEXT_PUBLIC_MAPBOX_TOKEN` and add a map component (not built) |
@@ -312,14 +317,70 @@ tests/
 
 ## Deployment
 
-No CI/CD or hosting config is included on purpose — the task explicitly
-calls for not deploying publicly or activating real payments/messages
-automatically. To deploy for real: point `DATABASE_URL` at a managed
-Postgres, set the four `R2_*` variables (or any S3-compatible bucket —
-`lib/storage.ts` needs no further code change, it detects them
-automatically) so uploaded files survive a serverless/ephemeral host, set
-real Stripe/Twilio credentials, and set `APP_MODE` to `pilot` or
-`marketplace` deliberately.
+**This app is live in production**, deployed on Vercel with a managed
+Postgres database, Cloudflare R2 file storage, and a custom domain. This
+section documents the actual running setup — not a hypothetical — so this
+context isn't lost between sessions.
+
+### Live environment
+
+| | |
+| --- | --- |
+| Production URL | https://delivery.lcosus.com |
+| Vercel project | `furniture-delivery-routes`, under the **`sergiojr230985`** team (see gotcha below) |
+| Database | Managed Postgres, connected via `DATABASE_URL` in Vercel's Production env vars |
+| File storage | Cloudflare R2 — `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET_NAME` are set in Vercel |
+| DNS | `delivery.lcosus.com` → GoDaddy, `CNAME` record `delivery` → `cname.vercel-dns.com` |
+| App mode | `APP_MODE=demo` (seeded demo orgs/users, simulated payments/messages — see "Roles & operating modes" above) |
+
+Demo login (all roles share this password): **`demo1234`**. A few examples —
+`admin@belliza.demo` (platform admin), `dispatch@belliza.demo` (dispatcher),
+`owner@casamiami.demo` (retailer owner), `jorge.crew@belliza.demo` /
+`wilfredo.crew@belliza.demo` (Belliza internal crew). Full list in
+`db/seed.ts`.
+
+### Known gotcha: two Vercel accounts
+
+The Vercel login used for this project (`lacuevitafurniture551@gmail.com`)
+has **two scopes**: a personal account `sergiojr230984` and a **Team**
+`sergiojr230985` — the project actually lives under the team, so its
+dashboard/API URLs read `vercel.com/sergiojr230985/furniture-delivery-routes/...`,
+not `.../sergiojr230984/...`. Same login, same person — just remember the
+URL uses the team slug, not the personal one.
+
+This also means: if you connect the official Vercel MCP/API connector,
+make sure it's authorized against the **`sergiojr230985`** team scope
+specifically, or calls like `get_deployment`, `get_runtime_logs`, and
+`list_deployment_events` will 403 with `"Trying to access resource under
+scope sergiojr230985"` even though basic calls like `list_projects`
+succeed. When that happens, the fallback is checking the Vercel dashboard
+directly in a browser (Project → Logs, or the failing deployment's
+Inspector URL from the GitHub PR status check).
+
+### To deploy elsewhere / redeploy from scratch
+
+Point `DATABASE_URL` at a managed Postgres, set the four `R2_*` variables
+(or any S3-compatible bucket — `lib/storage.ts` needs no further code
+change, it detects them automatically) so uploaded files survive a
+serverless/ephemeral host, set real Stripe/Twilio/WhatsApp credentials,
+and set `APP_MODE` to `pilot` or `marketplace` deliberately.
+
+### Outstanding work
+
+- **PR #10** (`claude/belliza-delivery-platform-865vys` → `main`,
+  "Fix photo upload 413, add WhatsApp delivery notifications") is open
+  but blocked: its Vercel preview deployment fails and the build log was
+  never captured/diagnosed (the MCP connector's scope gotcha above
+  prevented pulling it programmatically). Next step: open the failing
+  deployment's Inspector URL from the PR's "Vercel" status check in a
+  browser and read the actual build error before merging.
+- **PR #7** ("Invite-by-email flow for staff logins") and **PR #8**
+  ("Add WhatsApp delivery notifications (Meta Cloud API)") are stale —
+  both predate the Supabase-removal rewrite and conflict with `main`.
+  PR #8's feature was already rebuilt fresh in PR #10 above; #7 (staff
+  invite-by-email) has not been rebuilt yet. Both old PRs should be
+  closed once #10 merges, since reviving either old branch means
+  re-implementing it against the current schema anyway.
 
 ## Environment variables
 
