@@ -4,23 +4,31 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRoleOrThrow } from "@/lib/auth";
 import { query } from "@/lib/db";
-import { hashPassword } from "@/lib/password";
+import { createInvite, revokeInvite, DuplicateInviteError, EmailAlreadyRegisteredError } from "@/lib/invites";
 
-export async function addStaffAction(formData: FormData) {
+export async function inviteStaffAction(formData: FormData) {
   const user = await requireRoleOrThrow("retailer_owner");
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const fullName = String(formData.get("fullName") || "").trim();
-  const password = String(formData.get("password") || "");
-  if (!email || !fullName || password.length < 8) {
-    redirect("/retailer/staff?error=" + encodeURIComponent("Fill all fields (password 8+ chars)"));
+  if (!email || !fullName) {
+    redirect("/retailer/staff?error=" + encodeURIComponent("Fill in a name and email"));
   }
-  const hash = await hashPassword(password);
-  await query(`insert into users (org_id, role, full_name, email, password_hash) values ($1,'retailer_staff',$2,$3,$4)`, [
-    user.org_id,
-    fullName,
-    email,
-    hash,
-  ]);
+
+  try {
+    await createInvite({ orgId: user.org_id, role: "retailer_staff", email, fullName, invitedBy: user.id });
+  } catch (err) {
+    const message =
+      err instanceof DuplicateInviteError || err instanceof EmailAlreadyRegisteredError
+        ? err.message
+        : "Couldn't send the invite.";
+    redirect("/retailer/staff?error=" + encodeURIComponent(message));
+  }
+  revalidatePath("/retailer/staff");
+}
+
+export async function revokeInviteAction(inviteId: string) {
+  const user = await requireRoleOrThrow("retailer_owner");
+  await revokeInvite(inviteId, user.org_id);
   revalidatePath("/retailer/staff");
 }
 

@@ -252,12 +252,18 @@ left, per the instruction not to overclaim:
   actually running in the background. `app/api/webhooks/stripe` exists,
   but nothing schedules a periodic "widen pool" pass — a dispatcher
   triggers it manually from the dispatch board today.
-- **Password reset / email verification** don't exist — an admin/owner
-  hands out a temporary password out-of-band (shown once in the UI after
-  creating a login).
-- The document-upload flow accepts any file up to what Next's default
-  body-size limit allows; there's no virus scanning or strict file-type
-  sniffing beyond the extension.
+- **Password reset / email verification** don't exist. Retailer staff get
+  a proper invite-by-email flow (`lib/invites.ts`, token expires in 7
+  days, they set their own password) — the email itself routes through
+  the same demo-outbox pattern as every other notification, so without
+  real SMTP configured the invite link is shown directly to the inviting
+  owner on the Staff page instead of actually emailed. Every other
+  account type (platform admin/dispatcher, provider owner, crew member)
+  still gets a temporary password handed out of out-of-band by whoever
+  creates the login — not yet converted to the invite flow.
+- The document-upload flow accepts any file up to the 10MB Server Actions
+  body-size limit (`next.config.ts`); there's no virus scanning or strict
+  file-type sniffing beyond the extension.
 
 ## Security posture
 
@@ -367,20 +373,32 @@ and set `APP_MODE` to `pilot` or `marketplace` deliberately.
 
 ### Outstanding work
 
-- **PR #10** (`claude/belliza-delivery-platform-865vys` → `main`,
-  "Fix photo upload 413, add WhatsApp delivery notifications") is open
-  but blocked: its Vercel preview deployment fails and the build log was
-  never captured/diagnosed (the MCP connector's scope gotcha above
-  prevented pulling it programmatically). Next step: open the failing
-  deployment's Inspector URL from the PR's "Vercel" status check in a
-  browser and read the actual build error before merging.
+- **PR #10** (`claude/belliza-delivery-platform-865vys` → `main`) is open
+  but blocked on a real infra gap, now diagnosed: Vercel's **Preview**
+  environment is missing `DATABASE_URL` (and the other vars below) —
+  they're currently scoped to **Production** only. Next.js evaluates
+  every route handler during "Collecting page data" at build time, so any
+  route importing `lib/db.ts` throws `DATABASE_URL is not set` and fails
+  the *entire* preview build — independent of what the PR actually
+  changes (confirmed: even a single-line change failed identically).
+  **Fix (Vercel dashboard, not code)**: Project Settings → Environment
+  Variables → edit each of `DATABASE_URL`, `SESSION_SECRET`, `APP_MODE`,
+  `APP_BASE_URL`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
+  `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` → check the **Preview** box
+  alongside Production → Save. Only then will PR previews (and any future
+  PR against this repo) build successfully.
 - **PR #7** ("Invite-by-email flow for staff logins") and **PR #8**
   ("Add WhatsApp delivery notifications (Meta Cloud API)") are stale —
   both predate the Supabase-removal rewrite and conflict with `main`.
-  PR #8's feature was already rebuilt fresh in PR #10 above; #7 (staff
-  invite-by-email) has not been rebuilt yet. Both old PRs should be
-  closed once #10 merges, since reviving either old branch means
+  Both features have now been rebuilt fresh against the current
+  architecture and folded into PR #10 (WhatsApp) and this branch's
+  retailer-staff invite flow (`lib/invites.ts`, `app/invite/[token]`).
+  Close both old PRs once #10 merges — reviving either old branch means
   re-implementing it against the current schema anyway.
+- **Unverified**: the `sergiojr230985` Vercel team shown above wasn't
+  confirmed as actually owned by this login before using it further —
+  check Team Settings → Members there before trusting it with anything
+  sensitive.
 
 ## Environment variables
 
