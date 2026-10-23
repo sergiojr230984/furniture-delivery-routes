@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { query } from "@/lib/db";
+import { getProviderRatingSummaries } from "@/lib/ratings";
+import StarRating from "@/components/StarRating";
 import type { Organization } from "@/lib/types";
 
 export default async function AdminOrganizationsPage() {
   await requireRole("platform_admin", "dispatcher");
   const orgs = await query<Organization>(`select * from organizations where type in ('retailer','provider') order by type, name`);
+  const providerIds = orgs.filter((o) => o.type === "provider").map((o) => o.id);
+  const ratings = await getProviderRatingSummaries(providerIds);
 
   return (
     <div>
@@ -17,7 +21,15 @@ export default async function AdminOrganizationsPage() {
               <div className="font-medium text-navy-800">
                 {o.name} {o.is_internal_fleet && "(internal fleet)"} {o.is_demo && <span className="text-xs text-navy-400">Demo</span>}
               </div>
-              <div className="text-xs text-navy-400">{o.type}</div>
+              <div className="flex items-center gap-2 text-xs text-navy-400">
+                <span>{o.type}</span>
+                {o.type === "provider" && ratings.get(o.id)?.avg != null && (
+                  <span className="flex items-center gap-1">
+                    <StarRating value={ratings.get(o.id)!.avg!} />
+                    <span>({ratings.get(o.id)!.count})</span>
+                  </span>
+                )}
+              </div>
             </div>
             <span
               className={`badge ${

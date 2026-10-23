@@ -1,6 +1,8 @@
 import { requireRole } from "@/lib/auth";
 import { query, queryOne } from "@/lib/db";
 import { setOrgStatusAction, reviewDocumentAction } from "../actions";
+import { getProviderRatingSummary, listProviderRatings } from "@/lib/ratings";
+import StarRating from "@/components/StarRating";
 import { formatDate } from "@/lib/time";
 import type { Organization, ProviderDocument, ProviderVehicle, CrewMember } from "@/lib/types";
 
@@ -16,6 +18,8 @@ export default async function AdminOrganizationDetailPage({ params }: { params: 
   const vehicles = isProvider ? await query<ProviderVehicle>(`select * from provider_vehicles where org_id = $1`, [id]) : [];
   const crew = isProvider ? await query<CrewMember>(`select * from crew_members where org_id = $1`, [id]) : [];
   const users = await query<{ full_name: string; email: string; role: string }>(`select full_name, email, role from users where org_id = $1`, [id]);
+  const ratingSummary = isProvider ? await getProviderRatingSummary(id) : null;
+  const recentRatings = isProvider ? await listProviderRatings(id, 10) : [];
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
@@ -53,6 +57,34 @@ export default async function AdminOrganizationDetailPage({ params }: { params: 
 
       {isProvider && (
         <>
+          <div className="card p-4">
+            <h2 className="mb-2 font-semibold text-navy-800">Rating</h2>
+            {ratingSummary?.avg == null ? (
+              <p className="text-sm text-navy-500">No ratings yet.</p>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <StarRating value={ratingSummary.avg} size="text-xl" />
+                  <span className="font-bold text-navy-900">{ratingSummary.avg.toFixed(1)}</span>
+                  <span className="text-sm text-navy-400">({ratingSummary.count})</span>
+                </div>
+                {recentRatings.length > 0 && (
+                  <ul className="mt-3 divide-y divide-navy-100 text-sm">
+                    {recentRatings.map((r, i) => (
+                      <li key={i} className="py-2">
+                        <div className="flex items-center justify-between">
+                          <StarRating value={r.rating} />
+                          <span className="text-xs text-navy-400">{formatDate(r.created_at)}</span>
+                        </div>
+                        {r.comment && <p className="mt-1 text-navy-600">{r.comment}</p>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+          </div>
+
           <div className="card p-4">
             <h2 className="mb-2 font-semibold text-navy-800">Documents</h2>
             {docs.length === 0 && <p className="text-sm text-navy-500">No documents uploaded.</p>}

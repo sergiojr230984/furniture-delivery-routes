@@ -288,31 +288,35 @@ delivery platforms (sources: see chat session, not re-cited here) to find
 real, verified gaps — each checked against this codebase before being
 listed, not assumed from category conventions:
 
-**Closed** (this session): live GPS tracking + map (customer tracking page
-+ admin dispatch board, via Leaflet/OpenStreetMap — see the integrations
-table above) and real address geocoding (which also happened to fix
-previously-dead accurate-distance pricing — `distanceMilesBetween` already
-preferred real coordinates, they just never existed before).
+**Closed:**
+- **Live GPS tracking + map** (customer tracking page + admin dispatch
+  board, via Leaflet/OpenStreetMap — see the integrations table above)
+  and **real address geocoding** (which also happened to fix
+  previously-dead accurate-distance pricing — `distanceMilesBetween`
+  already preferred real coordinates, they just never existed before).
+- **Provider/driver ratings & reviews** (`lib/ratings.ts`,
+  `assignment_ratings` table): the retailer rates a delivery 1-5 stars +
+  optional comment once it's `completed`/`failed`, from the booking
+  detail page. Surfaced on the provider's own dashboard (which was
+  previously a literal "Coming up next" stub — now a real page with
+  rating, active jobs, and earnings snapshot) and to admin/dispatch on
+  the organizations list and detail pages.
 
 **Still open**, roughly in order of how consistently every competitor
 researched treats them as table stakes:
 
-1. **No provider/driver rating or review system.** Zero tables, zero UI.
-   In a two-sided marketplace (which this is), ratings are the core trust
-   signal between retailers and the providers actually delivering their
-   furniture — every comparable platform researched leads with this.
-2. **No customer self-service reschedule.** `change_orders` has a table
+1. **No customer self-service reschedule.** `change_orders` has a table
    and audit trail but no UI to raise one — a window change has to go
    through the retailer/store manually today.
-3. **Item-level assembly time doesn't feed ETAs/capacity.**
+2. **Item-level assembly time doesn't feed ETAs/capacity.**
    `booking_items.assembly_required` is a pricing-only boolean; it doesn't
    add service-time to a stop's duration estimate, which is exactly what
    furniture-specific platforms (InstaDispatch) call out as the thing that
    actually blows up a route's schedule.
-4. **No e-commerce order import.** Bookings are 100% manual via the
+3. **No e-commerce order import.** Bookings are 100% manual via the
    wizard — no API/webhook for a retailer's own Shopify/WooCommerce to
    auto-create one.
-5. **No offline evidence queue in the crew app** (already listed above) —
+4. **No offline evidence queue in the crew app** (already listed above) —
    a dropped connection loses an in-progress photo upload rather than
    queuing it for retry.
 

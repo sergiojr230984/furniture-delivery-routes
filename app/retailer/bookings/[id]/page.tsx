@@ -2,14 +2,24 @@ import { requireRole } from "@/lib/auth";
 import { query, queryOne } from "@/lib/db";
 import { assertBookingOwnedByOrg } from "@/lib/booking-service";
 import StatusBadge from "@/components/StatusBadge";
+import StarRating from "@/components/StarRating";
 import { formatMoney } from "@/lib/money";
 import { formatDateTime, formatWallTime } from "@/lib/time";
 import { trackingUrl } from "@/lib/tracking";
 import { fileClaimAction } from "./claim-actions";
+import { rateDeliveryAction } from "./rating-actions";
+import { getBookingRating } from "@/lib/ratings";
 import type { Booking, BookingDestination, BookingItem, BookingPickup, Claim } from "@/lib/types";
 
-export default async function RetailerBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function RetailerBookingDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
   const { id } = await params;
+  const { error } = await searchParams;
   const user = await requireRole("retailer_owner", "retailer_staff");
   await assertBookingOwnedByOrg(id, user.org_id);
 
@@ -33,6 +43,8 @@ export default async function RetailerBookingDetailPage({ params }: { params: Pr
   );
   const claims = await query<Claim>(`select * from claims where booking_id = $1 order by created_at desc`, [id]);
   const canClaim = ["delivered", "partially_delivered", "failed"].includes(booking.status);
+  const canRate = !!assignment && ["completed", "failed"].includes(assignment.status);
+  const existingRating = assignment ? await getBookingRating(id) : null;
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
@@ -43,6 +55,8 @@ export default async function RetailerBookingDetailPage({ params }: { params: Pr
         </div>
         <StatusBadge status={booking.status} />
       </div>
+
+      {error && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
 
       {token && (
         <div className="card p-4">
@@ -61,6 +75,32 @@ export default async function RetailerBookingDetailPage({ params }: { params: Pr
             {assignment.vehicle_name ? ` — ${assignment.vehicle_name}` : ""} ({assignment.status.replace(/_/g, " ")})
           </p>
         </div>
+      )}
+
+      {existingRating && (
+        <div className="card p-4 text-sm">
+          <p className="mb-1 font-medium text-navy-700">Your rating</p>
+          <StarRating value={existingRating.rating} size="text-lg" />
+          {existingRating.comment && <p className="mt-1 text-navy-600">{existingRating.comment}</p>}
+        </div>
+      )}
+
+      {canRate && !existingRating && (
+        <form action={rateDeliveryAction.bind(null, booking.id)} className="card space-y-2 p-4">
+          <p className="font-medium text-navy-700">Rate this delivery</p>
+          <select className="input" name="rating" required defaultValue="5">
+            {[5, 4, 3, 2, 1].map((n) => (
+              <option key={n} value={n}>
+                {"★".repeat(n)}
+                {"☆".repeat(5 - n)} ({n}/5)
+              </option>
+            ))}
+          </select>
+          <textarea className="input" name="comment" rows={2} placeholder="Comment (optional)" />
+          <button type="submit" className="btn-primary w-full">
+            Submit rating
+          </button>
+        </form>
       )}
 
       <div className="card p-4">
