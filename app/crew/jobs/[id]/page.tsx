@@ -10,6 +10,7 @@ import {
   reportIssueAction,
 } from "./actions";
 import SignatureCapture from "@/components/SignatureCapture";
+import LocationTracker from "@/components/LocationTracker";
 import { signedFileUrls } from "@/lib/storage";
 import type { AssignmentStatus } from "@/lib/constants";
 import type { Booking, BookingDestination, BookingItem, BookingPickup } from "@/lib/types";
@@ -56,6 +57,8 @@ export default async function CrewJobDetailPage({
       </div>
 
       {error && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
+
+      {(status === "en_route_pickup" || status === "en_route_delivery") && <LocationTracker assignmentId={assignmentId} />}
 
       {status === "assigned" && (
         <div className="card space-y-3 p-4">

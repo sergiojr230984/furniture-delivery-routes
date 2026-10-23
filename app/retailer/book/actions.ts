@@ -16,6 +16,7 @@ import {
   type ItemInput,
 } from "@/lib/booking-service";
 import type { ItemCategory, PackagingCondition, ServiceLevel } from "@/lib/constants";
+import { geocodeAddress } from "@/lib/geocoding";
 
 export async function startBookingAction(formData: FormData) {
   const user = await requireRoleOrThrow("retailer_owner", "retailer_staff");
@@ -188,13 +189,24 @@ export async function saveDestinationAction(bookingId: string, formData: FormDat
   const user = await requireRoleOrThrow("retailer_owner", "retailer_staff");
   await assertBookingOwnedByOrg(bookingId, user.org_id);
 
+  const addressLine1 = String(formData.get("addressLine1") || "");
+  const city = String(formData.get("city") || "Miami");
+  const postalCode = String(formData.get("postalCode") || "");
+  // Best-effort — a free public geocoder with no SLA. Never blocks the
+  // booking: geocodeAddress returns null on any failure/timeout, and the
+  // destination still saves fine without coordinates (the live tracking
+  // map just won't have a destination pin for this one booking).
+  const geocoded = await geocodeAddress({ addressLine1, city, postalCode });
+
   await upsertDestination(bookingId, {
     customerName: String(formData.get("customerName") || ""),
     customerPhone: String(formData.get("customerPhone") || ""),
     customerEmail: String(formData.get("customerEmail") || "") || null,
-    addressLine1: String(formData.get("addressLine1") || ""),
-    city: String(formData.get("city") || "Miami"),
-    postalCode: String(formData.get("postalCode") || ""),
+    addressLine1,
+    city,
+    postalCode,
+    latitude: geocoded?.lat ?? null,
+    longitude: geocoded?.lng ?? null,
     floor: formData.get("floor") ? Number(formData.get("floor")) : null,
     stairsFlights: Number(formData.get("stairsFlights") || 0),
     elevatorAvailable: formData.get("elevatorAvailable") === "on",

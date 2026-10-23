@@ -192,3 +192,23 @@ export async function advanceAssignment(opts: {
 export async function reportIssue(opts: { assignmentId: string; reason: string; actorUserId: string }): Promise<void> {
   await advanceAssignment({ assignmentId: opts.assignmentId, to: "failed", actorUserId: opts.actorUserId, notes: opts.reason });
 }
+
+// Location pings are only meaningful (and only accepted) while the crew is
+// actually en route — not before the job starts, not after it's done. This
+// also means a stale GPS fix left running in a background tab can't keep
+// overwriting "last known position" for a completed job.
+const TRACKABLE_STATUSES: AssignmentStatus[] = ["en_route_pickup", "en_route_delivery"];
+
+export async function updateAssignmentLocation(opts: {
+  assignmentId: string;
+  lat: number;
+  lng: number;
+}): Promise<{ accepted: boolean }> {
+  const result = await query(
+    `update assignments set last_lat = $2, last_lng = $3, last_location_at = now()
+     where id = $1 and status = any($4::assignment_status[])
+     returning id`,
+    [opts.assignmentId, opts.lat, opts.lng, TRACKABLE_STATUSES]
+  );
+  return { accepted: result.length > 0 };
+}
