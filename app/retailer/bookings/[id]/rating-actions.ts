@@ -20,4 +20,5 @@ export async function rateDeliveryAction(bookingId: string, formData: FormData) 
     redirect(`/retailer/bookings/${bookingId}?error=${encodeURIComponent(message)}`);
   }
   revalidatePath(`/retailer/bookings/${bookingId}`);
+  redirect(`/retailer/bookings/${bookingId}?success=${encodeURIComponent("Thanks for the feedback!")}`);
 }

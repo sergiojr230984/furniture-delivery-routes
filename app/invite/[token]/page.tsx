@@ -1,5 +1,7 @@
 import { resolveInvite } from "@/lib/invites";
 import WordMark from "@/components/WordMark";
+import Flash from "@/components/Flash";
+import SubmitButton from "@/components/SubmitButton";
 import { acceptInviteAction } from "./actions";
 
 export default async function InvitePage({
@@ -34,7 +36,7 @@ export default async function InvitePage({
               </p>
             </div>
 
-            {error && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
+            <Flash error={error && decodeURIComponent(error)} />
 
             <div>
               <label className="label" htmlFor="password">
@@ -48,9 +50,7 @@ export default async function InvitePage({
               </label>
               <input className="input" id="confirm" name="confirm" type="password" required minLength={8} autoComplete="new-password" />
             </div>
-            <button type="submit" className="btn-primary w-full">
-              Set password &amp; sign in
-            </button>
+            <SubmitButton pendingText="Signing in…">Set password &amp; sign in</SubmitButton>
           </form>
         )}
       </div>

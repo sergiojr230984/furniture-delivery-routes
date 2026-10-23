@@ -5,6 +5,8 @@ import { getLocale, t } from "@/lib/i18n";
 import { loginAction } from "./actions";
 import WordMark from "@/components/WordMark";
 import LocaleSwitch from "@/components/LocaleSwitch";
+import Flash from "@/components/Flash";
+import SubmitButton from "@/components/SubmitButton";
 
 export default async function LoginPage({
   searchParams,
@@ -29,9 +31,7 @@ export default async function LoginPage({
         <form action={loginAction} className="card space-y-4 p-6">
           <h1 className="text-lg font-semibold text-navy-900">{t(locale, "login_title")}</h1>
 
-          {error && (
-            <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{t(locale, "login_error")}</div>
-          )}
+          <Flash error={error ? t(locale, "login_error") : undefined} />
 
           <div>
             <label className="label" htmlFor="email">
@@ -52,9 +52,7 @@ export default async function LoginPage({
               autoComplete="current-password"
             />
           </div>
-          <button type="submit" className="btn-primary w-full">
-            {t(locale, "login_submit")}
-          </button>
+          <SubmitButton>{t(locale, "login_submit")}</SubmitButton>
         </form>
 
         {mode === "demo" && (

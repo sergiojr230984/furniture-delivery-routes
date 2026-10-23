@@ -6,6 +6,7 @@ import { widenOffersAction } from "../organizations/actions";
 import { batchRouteAction, reoptimizeRouteAction } from "./actions";
 import LiveMap from "@/components/LiveMapClient";
 import type { MapMarker } from "@/components/LiveMap";
+import SubmitButton from "@/components/SubmitButton";
 
 export default async function DispatchBoardPage() {
   await requireRole("platform_admin", "dispatcher");
@@ -112,9 +113,9 @@ export default async function DispatchBoardPage() {
                 <span className="text-navy-400">{b.pending_offers} pending offer(s)</span>
                 {Number(b.pending_offers) === 0 && (
                   <form action={widenOffersAction.bind(null, b.id)}>
-                    <button type="submit" className="btn-secondary !px-2 !py-1 text-xs">
+                    <SubmitButton className="btn-secondary !px-2 !py-1 text-xs" pendingText="Widening…">
                       Widen pool / raise payout
-                    </button>
+                    </SubmitButton>
                   </form>
                 )}
               </div>
@@ -164,9 +165,9 @@ export default async function DispatchBoardPage() {
                   {formatDate(b.window_date)} · {b.provider_name} — {b.vehicle_name} ({b.job_count} jobs)
                 </span>
                 <form action={batchRouteAction.bind(null, b.provider_org_id, b.vehicle_id, b.window_date)}>
-                  <button type="submit" className="btn-secondary !px-2 !py-1 text-xs">
+                  <SubmitButton className="btn-secondary !px-2 !py-1 text-xs" pendingText="Batching…">
                     Batch into route
-                  </button>
+                  </SubmitButton>
                 </form>
               </li>
             ))}
@@ -185,9 +186,9 @@ export default async function DispatchBoardPage() {
                   {r.total_distance_mi && ` · ${r.total_distance_mi} mi · ${r.total_duration_min} min`}
                 </span>
                 <form action={reoptimizeRouteAction.bind(null, r.id)}>
-                  <button type="submit" className="btn-secondary !px-2 !py-1 text-xs">
+                  <SubmitButton className="btn-secondary !px-2 !py-1 text-xs" pendingText="Optimizing…">
                     Re-optimize
-                  </button>
+                  </SubmitButton>
                 </form>
               </li>
             ))}

@@ -1,4 +1,6 @@
 import WordMark from "@/components/WordMark";
+import Flash from "@/components/Flash";
+import SubmitButton from "@/components/SubmitButton";
 import { applyAsProviderAction } from "./actions";
 import { currentAppMode } from "@/lib/constants";
 
@@ -21,16 +23,14 @@ export default async function ApplyProviderPage({ searchParams }: { searchParams
           <div className="card p-5 text-sm text-navy-600">Provider onboarding is currently disabled — Belliza is running an internal pilot.</div>
         ) : (
           <form action={applyAsProviderAction} className="card space-y-4 p-5">
-            {error && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
+            <Flash error={error && decodeURIComponent(error)} />
             <input className="input" name="companyName" placeholder="Company name" required />
             <input className="input" name="contactName" placeholder="Your name" required />
             <input className="input" name="email" type="email" placeholder="Email" required />
             <input className="input" name="phone" placeholder="Phone" />
             <input className="input" name="serviceArea" placeholder="Service area (e.g. Miami-Dade County)" />
             <input className="input" name="password" type="password" placeholder="Choose a password (8+ characters)" required minLength={8} />
-            <button type="submit" className="btn-primary w-full">
-              Apply
-            </button>
+            <SubmitButton pendingText="Submitting…">Apply</SubmitButton>
             <p className="text-xs text-navy-400">
               After applying you can upload your documents and add vehicles/crew, but Belliza reviews and approves
               every provider before you receive job offers.

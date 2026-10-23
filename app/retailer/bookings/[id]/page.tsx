@@ -3,6 +3,9 @@ import { query, queryOne } from "@/lib/db";
 import { assertBookingOwnedByOrg } from "@/lib/booking-service";
 import StatusBadge from "@/components/StatusBadge";
 import StarRating from "@/components/StarRating";
+import Flash from "@/components/Flash";
+import SubmitButton from "@/components/SubmitButton";
+import CopyButton from "@/components/CopyButton";
 import { formatMoney } from "@/lib/money";
 import { formatDateTime, formatWallTime } from "@/lib/time";
 import { trackingUrl } from "@/lib/tracking";
@@ -16,10 +19,10 @@ export default async function RetailerBookingDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; success?: string }>;
 }) {
   const { id } = await params;
-  const { error } = await searchParams;
+  const { error, success } = await searchParams;
   const user = await requireRole("retailer_owner", "retailer_staff");
   await assertBookingOwnedByOrg(id, user.org_id);
 
@@ -56,14 +59,17 @@ export default async function RetailerBookingDetailPage({
         <StatusBadge status={booking.status} />
       </div>
 
-      {error && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
+      <Flash error={error && decodeURIComponent(error)} success={success && decodeURIComponent(success)} />
 
       {token && (
-        <div className="card p-4">
-          <p className="text-sm font-medium text-navy-700">Customer tracking link</p>
-          <a href={trackingUrl(token.token)} className="break-all text-sm text-orange-600 underline">
-            {trackingUrl(token.token)}
-          </a>
+        <div className="card flex items-center justify-between gap-2 p-4">
+          <div>
+            <p className="text-sm font-medium text-navy-700">Customer tracking link</p>
+            <a href={trackingUrl(token.token)} className="break-all text-sm text-orange-600 underline">
+              {trackingUrl(token.token)}
+            </a>
+          </div>
+          <CopyButton text={trackingUrl(token.token)} />
         </div>
       )}
 
@@ -97,9 +103,7 @@ export default async function RetailerBookingDetailPage({
             ))}
           </select>
           <textarea className="input" name="comment" rows={2} placeholder="Comment (optional)" />
-          <button type="submit" className="btn-primary w-full">
-            Submit rating
-          </button>
+          <SubmitButton pendingText="Submitting…">Submit rating</SubmitButton>
         </form>
       )}
 
@@ -173,9 +177,9 @@ export default async function RetailerBookingDetailPage({
             <form action={fileClaimAction.bind(null, booking.id)} className="space-y-2">
               <textarea className="input" name="description" rows={2} placeholder="Describe the issue" required />
               <input className="input" name="requestedAmount" type="number" step="0.01" placeholder="Requested amount (optional)" />
-              <button type="submit" className="btn-secondary w-full">
+              <SubmitButton className="btn-secondary w-full" pendingText="Filing…">
                 File a claim
-              </button>
+              </SubmitButton>
             </form>
           )}
         </div>
