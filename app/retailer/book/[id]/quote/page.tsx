@@ -7,6 +7,8 @@ import {
 } from "@/lib/booking-service";
 import { confirmInternalAction, requestMarketplaceAction } from "../../actions";
 import BookingWizardSteps from "@/components/BookingWizardSteps";
+import Flash from "@/components/Flash";
+import SubmitButton from "@/components/SubmitButton";
 import { formatMoney } from "@/lib/money";
 import { formatDate } from "@/lib/time";
 import { currentAppMode } from "@/lib/constants";
@@ -47,7 +49,9 @@ export default async function QuoteStepPage({
       <BookingWizardSteps current="quote" />
       <h1 className="text-2xl font-bold text-navy-900">Quote &amp; availability</h1>
 
-      {error && <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
+      <div className="mt-4">
+        <Flash error={error && decodeURIComponent(error)} />
+      </div>
 
       <div className="card mt-6 p-5">
         <h2 className="mb-3 font-semibold text-navy-800">Itemized price</h2>
@@ -93,8 +97,14 @@ export default async function QuoteStepPage({
         </div>
       ) : (
         <>
-          <div className="card mt-4 space-y-3 p-5">
-            <h2 className="font-semibold text-navy-800">Belliza crew — instant confirmation</h2>
+          <p className="mb-2 mt-6 text-xs font-medium uppercase tracking-wide text-navy-400">Choose how to fulfill this delivery</p>
+
+          <div className="card space-y-3 border-2 border-emerald-200 p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-navy-800">Belliza crew</h2>
+              <span className="badge border-emerald-200 bg-emerald-50 text-emerald-700">Recommended · Instant</span>
+            </div>
+            <p className="text-xs text-navy-500">Confirmed immediately — no waiting on anyone to accept.</p>
             {bookableDays.length === 0 ? (
               <p className="text-sm text-navy-500">No internal capacity in the next 10 days. Use the delivery network below instead.</p>
             ) : (
@@ -113,19 +123,21 @@ export default async function QuoteStepPage({
                     </option>
                   ))}
                 </select>
-                <button type="submit" className="btn-primary w-full">
-                  Confirm &amp; pay {formatMoney(quote.total)}
-                </button>
+                <SubmitButton pendingText="Confirming…">Confirm &amp; pay {formatMoney(quote.total)}</SubmitButton>
               </form>
             )}
           </div>
 
           {mode !== "pilot" && (
-            <div className="card mt-4 space-y-3 p-5">
-              <h2 className="font-semibold text-navy-800">Approved delivery network</h2>
+            <div className="card mt-4 space-y-3 border-2 border-amber-200 p-5">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-navy-800">Approved delivery network</h2>
+                <span className="badge border-amber-200 bg-amber-50 text-amber-700">External · Not guaranteed yet</span>
+              </div>
               <p className="text-xs text-navy-500">
                 We&apos;ll authorize payment and send this to qualified independent delivery providers. You&apos;ll see
-                &quot;awaiting provider acceptance&quot; until one accepts — this is not yet a guaranteed delivery.
+                &quot;awaiting provider acceptance&quot; until one accepts — <strong>this is not yet a guaranteed delivery.</strong> Only
+                use this if Belliza crew isn&apos;t available above.
               </p>
               <form action={requestMarketplaceAction.bind(null, id)} className="space-y-3">
                 <select className="input" name="windowDate" required defaultValue={bookableDays[0]?.date}>
@@ -142,9 +154,9 @@ export default async function QuoteStepPage({
                     </option>
                   ))}
                 </select>
-                <button type="submit" className="btn-secondary w-full">
+                <SubmitButton className="btn-secondary w-full" pendingText="Sending…">
                   Send to delivery network
-                </button>
+                </SubmitButton>
               </form>
             </div>
           )}

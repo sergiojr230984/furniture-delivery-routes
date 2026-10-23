@@ -1,6 +1,8 @@
 import { requireRole } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { createDraftRuleSetAction, activateRuleSetAction } from "./actions";
+import Flash from "@/components/Flash";
+import SubmitButton from "@/components/SubmitButton";
 import { formatDate } from "@/lib/time";
 import type { PricingRuleSet } from "@/lib/types";
 
@@ -15,7 +17,7 @@ export default async function AdminPricingPage({ searchParams }: { searchParams:
       <h1 className="text-2xl font-bold text-navy-900">Pricing</h1>
       <p className="text-sm text-navy-500">{active?.label} — labeled &quot;Example&quot; until you configure real Miami market rates.</p>
 
-      {error && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
+      <Flash error={error && decodeURIComponent(error)} />
 
       <div className="card divide-y divide-navy-100">
         {ruleSets.map((r) => (
@@ -28,9 +30,7 @@ export default async function AdminPricingPage({ searchParams }: { searchParams:
             </div>
             {r.status === "draft" && (
               <form action={activateRuleSetAction.bind(null, r.id)}>
-                <button type="submit" className="btn-primary">
-                  Activate
-                </button>
+                <SubmitButton pendingText="Activating…">Activate</SubmitButton>
               </form>
             )}
           </div>
@@ -51,9 +51,9 @@ export default async function AdminPricingPage({ searchParams }: { searchParams:
           have no effect until activated — activating archives the previously active version, and every already-quoted
           booking keeps the rule-set snapshot it was quoted under.
         </p>
-        <button type="submit" className="btn-secondary w-full">
+        <SubmitButton className="btn-secondary w-full" pendingText="Saving…">
           Save as new draft
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

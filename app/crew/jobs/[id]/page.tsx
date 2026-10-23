@@ -11,6 +11,8 @@ import {
 } from "./actions";
 import SignatureCapture from "@/components/SignatureCapture";
 import LocationTracker from "@/components/LocationTracker";
+import Flash from "@/components/Flash";
+import SubmitButton from "@/components/SubmitButton";
 import { signedFileUrls } from "@/lib/storage";
 import type { AssignmentStatus } from "@/lib/constants";
 import type { Booking, BookingDestination, BookingItem, BookingPickup } from "@/lib/types";
@@ -56,7 +58,7 @@ export default async function CrewJobDetailPage({
         <p className="text-sm font-medium uppercase tracking-wide text-orange-600">{status.replace(/_/g, " ")}</p>
       </div>
 
-      {error && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
+      <Flash error={error && decodeURIComponent(error)} />
 
       {(status === "en_route_pickup" || status === "en_route_delivery") && <LocationTracker assignmentId={assignmentId} />}
 
@@ -65,9 +67,7 @@ export default async function CrewJobDetailPage({
           <h2 className="font-semibold text-navy-800">Confirm crew &amp; vehicle</h2>
           <p className="text-sm text-navy-500">Confirm you have the assigned vehicle and both crew members before departing.</p>
           <form action={advanceStatusAction.bind(null, assignmentId, "en_route_pickup")}>
-            <button type="submit" className="btn-primary w-full">
-              Confirmed — start route
-            </button>
+            <SubmitButton pendingText="Starting…">Confirmed — start route</SubmitButton>
           </form>
         </div>
       )}
@@ -80,9 +80,7 @@ export default async function CrewJobDetailPage({
             Open navigation
           </a>
           <form action={advanceStatusAction.bind(null, assignmentId, "arrived_pickup")}>
-            <button type="submit" className="btn-primary w-full">
-              Arrived at pickup
-            </button>
+            <SubmitButton pendingText="Updating…">Arrived at pickup</SubmitButton>
           </form>
         </div>
       )}
@@ -94,9 +92,9 @@ export default async function CrewJobDetailPage({
           <form action={uploadPhotoAction.bind(null, assignmentId, "pickup_condition")} className="space-y-2">
             <input type="file" name="file" accept="image/*" capture="environment" required className="input" />
             <input type="text" name="caption" placeholder="Note any existing damage (optional)" className="input" />
-            <button type="submit" className="btn-secondary w-full">
+            <SubmitButton className="btn-secondary w-full" pendingText="Uploading…">
               Add condition photo
-            </button>
+            </SubmitButton>
           </form>
 
           <h2 className="font-semibold text-navy-800">Collected items</h2>
@@ -106,15 +104,13 @@ export default async function CrewJobDetailPage({
                 <input type="checkbox" name="items" value={it.id} /> {it.quantity}× {it.name}
               </label>
             ))}
-            <button type="submit" className="btn-secondary w-full">
+            <SubmitButton className="btn-secondary w-full" pendingText="Saving…">
               Confirm collected checklist
-            </button>
+            </SubmitButton>
           </form>
 
           <form action={advanceStatusAction.bind(null, assignmentId, "picked_up")}>
-            <button type="submit" className="btn-primary w-full">
-              Items picked up
-            </button>
+            <SubmitButton pendingText="Updating…">Items picked up</SubmitButton>
           </form>
         </div>
       )}
@@ -123,9 +119,7 @@ export default async function CrewJobDetailPage({
         <div className="card space-y-3 p-4">
           <h2 className="font-semibold text-navy-800">Ready to deliver</h2>
           <form action={advanceStatusAction.bind(null, assignmentId, "en_route_delivery")}>
-            <button type="submit" className="btn-primary w-full">
-              En route to delivery
-            </button>
+            <SubmitButton pendingText="Updating…">En route to delivery</SubmitButton>
           </form>
         </div>
       )}
@@ -139,9 +133,7 @@ export default async function CrewJobDetailPage({
             Open navigation
           </a>
           <form action={advanceStatusAction.bind(null, assignmentId, "arrived_delivery")}>
-            <button type="submit" className="btn-primary w-full">
-              Arrived at delivery
-            </button>
+            <SubmitButton pendingText="Updating…">Arrived at delivery</SubmitButton>
           </form>
         </div>
       )}
@@ -155,9 +147,9 @@ export default async function CrewJobDetailPage({
                 <input type="checkbox" name="items" value={it.id} /> {it.quantity}× {it.name}
               </label>
             ))}
-            <button type="submit" className="btn-secondary w-full">
+            <SubmitButton className="btn-secondary w-full" pendingText="Saving…">
               Confirm delivered checklist
-            </button>
+            </SubmitButton>
           </form>
 
           {items.some((i) => i.assembly_required) && (
@@ -168,9 +160,9 @@ export default async function CrewJobDetailPage({
                   <input type="checkbox" name="items" value={it.id} /> {it.name} assembled
                 </label>
               ))}
-              <button type="submit" className="btn-secondary w-full">
+              <SubmitButton className="btn-secondary w-full" pendingText="Saving…">
                 Confirm assembly complete
-              </button>
+              </SubmitButton>
             </form>
           )}
 
@@ -178,24 +170,22 @@ export default async function CrewJobDetailPage({
           <EvidencePhotos evidence={evidence} stage="delivery_completed" urls={photoUrls} />
           <form action={uploadPhotoAction.bind(null, assignmentId, "delivery_completed")} className="space-y-2">
             <input type="file" name="file" accept="image/*" capture="environment" required className="input" />
-            <button type="submit" className="btn-secondary w-full">
+            <SubmitButton className="btn-secondary w-full" pendingText="Uploading…">
               Add completion photo
-            </button>
+            </SubmitButton>
           </form>
 
           <h2 className="font-semibold text-navy-800">Customer signature</h2>
           <SignatureCapture action={submitSignatureAction.bind(null, assignmentId)} />
           <form action={waiveSignatureAction.bind(null, assignmentId)} className="space-y-2 border-t border-navy-100 pt-3">
             <input type="text" name="reason" placeholder="Signature unavailable — reason" className="input" />
-            <button type="submit" className="btn-ghost w-full text-xs">
+            <SubmitButton className="btn-ghost w-full text-xs" pendingText="Saving…">
               Waive signature (customer not present, etc.)
-            </button>
+            </SubmitButton>
           </form>
 
           <form action={advanceStatusAction.bind(null, assignmentId, "completed")}>
-            <button type="submit" className="btn-primary w-full">
-              Mark delivered
-            </button>
+            <SubmitButton pendingText="Completing…">Mark delivered</SubmitButton>
           </form>
         </div>
       )}
@@ -204,9 +194,9 @@ export default async function CrewJobDetailPage({
         <summary className="cursor-pointer text-sm font-medium text-red-600">Report an issue / failed delivery</summary>
         <form action={reportIssueAction.bind(null, assignmentId)} className="mt-3 space-y-2">
           <textarea name="reason" required rows={3} placeholder="What happened?" className="input" />
-          <button type="submit" className="btn-danger w-full">
+          <SubmitButton className="btn-danger w-full" pendingText="Reporting…">
             Report failed delivery
-          </button>
+          </SubmitButton>
         </form>
       </details>
     </div>

@@ -1,6 +1,8 @@
 import { requireRole } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { setContributionFloorAction, createRetailerAction } from "./actions";
+import Flash from "@/components/Flash";
+import SubmitButton from "@/components/SubmitButton";
 import { currentAppMode } from "@/lib/constants";
 import { isStripeConfigured } from "@/lib/payments";
 import { formatMoney } from "@/lib/money";
@@ -37,9 +39,9 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
             <form key={p.id} action={setContributionFloorAction.bind(null, p.id)} className="flex items-center gap-3 text-sm">
               <span className="w-56 shrink-0 text-navy-700">{p.name}</span>
               <input className="input" name="amount" type="number" step="0.01" defaultValue={p.contribution_floor_amount ?? ""} placeholder="$ floor" />
-              <button type="submit" className="btn-secondary shrink-0">
+              <SubmitButton className="btn-secondary shrink-0" pendingText="Saving…">
                 Save
-              </button>
+              </SubmitButton>
               <span className="text-xs text-navy-400">current: {p.contribution_floor_amount ? formatMoney(p.contribution_floor_amount) : "none"}</span>
             </form>
           ))}
@@ -48,14 +50,12 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
 
       <form action={createRetailerAction} className="card space-y-3 p-5">
         <h2 className="font-semibold text-navy-800">Add a retailer organization</h2>
-        {error && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
+        <Flash error={error && decodeURIComponent(error)} />
         <input className="input" name="name" placeholder="Retailer company name" required />
         <input className="input" name="ownerName" placeholder="Owner full name" />
         <input className="input" name="email" type="email" placeholder="Owner email" required />
         <input className="input" name="password" type="password" placeholder="Temporary password (8+ chars)" required minLength={8} />
-        <button type="submit" className="btn-primary w-full">
-          Create retailer
-        </button>
+        <SubmitButton pendingText="Creating…">Create retailer</SubmitButton>
       </form>
     </div>
   );

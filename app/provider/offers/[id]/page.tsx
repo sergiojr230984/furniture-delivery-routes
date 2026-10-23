@@ -1,6 +1,8 @@
 import { requireRole } from "@/lib/auth";
 import { query, queryOne } from "@/lib/db";
 import { acceptOfferAction, declineOfferAction } from "../actions";
+import Flash from "@/components/Flash";
+import SubmitButton from "@/components/SubmitButton";
 import { formatMoney } from "@/lib/money";
 import { formatDateTime } from "@/lib/time";
 import { ITEM_CATEGORY_LABELS, SERVICE_LEVEL_LABELS } from "@/lib/constants";
@@ -61,7 +63,9 @@ export default async function OfferDetailPage({
     <div className="mx-auto max-w-lg">
       <h1 className="text-xl font-bold text-navy-900">Offer detail</h1>
 
-      {error && <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{decodeURIComponent(error)}</div>}
+      <div className="mt-3">
+        <Flash error={error && decodeURIComponent(error)} />
+      </div>
 
       <div className="card mt-4 space-y-3 p-5">
         <div className="flex items-center justify-between">
@@ -112,17 +116,15 @@ export default async function OfferDetailPage({
               </label>
             ))}
           </div>
-          <button type="submit" className="btn-primary w-full">
-            Accept offer
-          </button>
+          <SubmitButton pendingText="Accepting…">Accept offer</SubmitButton>
         </form>
       )}
 
       {offer.status === "pending" && (
         <form action={declineOfferAction.bind(null, offer.id)} className="mt-3">
-          <button type="submit" className="btn-secondary w-full">
+          <SubmitButton className="btn-secondary w-full" pendingText="Declining…">
             Decline
-          </button>
+          </SubmitButton>
         </form>
       )}
     </div>

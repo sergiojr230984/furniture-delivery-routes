@@ -14,5 +14,5 @@ export async function fileClaimAction(bookingId: string, formData: FormData) {
     [bookingId, String(formData.get("description") || ""), Number(formData.get("requestedAmount") || 0) || null, user.id]
   );
 
-  redirect(`/retailer/bookings/${bookingId}`);
+  redirect(`/retailer/bookings/${bookingId}?success=${encodeURIComponent("Claim filed — we'll follow up soon.")}`);
 }
