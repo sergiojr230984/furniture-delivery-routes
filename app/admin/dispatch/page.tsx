@@ -4,6 +4,8 @@ import { query } from "@/lib/db";
 import { formatDate, formatWallTime, formatDateTime } from "@/lib/time";
 import { widenOffersAction } from "../organizations/actions";
 import { batchRouteAction, reoptimizeRouteAction } from "./actions";
+import LiveMap from "@/components/LiveMapClient";
+import type { MapMarker } from "@/components/LiveMap";
 
 export default async function DispatchBoardPage() {
   await requireRole("platform_admin", "dispatcher");
@@ -29,14 +31,27 @@ export default async function DispatchBoardPage() {
     is_internal: boolean;
     window_start: string | null;
     window_end: string | null;
+    last_lat: number | null;
+    last_lng: number | null;
+    last_location_at: string | null;
   }>(
-    `select a.id, b.booking_number, a.status, o.name as provider_name, o.is_internal_fleet as is_internal, b.window_start, b.window_end
+    `select a.id, b.booking_number, a.status, o.name as provider_name, o.is_internal_fleet as is_internal,
+            b.window_start, b.window_end, a.last_lat, a.last_lng, a.last_location_at
      from assignments a
      join bookings b on b.id = a.booking_id
      join organizations o on o.id = a.provider_org_id
      where b.window_date = current_date
      order by b.window_start`
   );
+
+  const liveMarkers: MapMarker[] = todaysJobs
+    .filter((j) => j.last_lat != null && j.last_lng != null)
+    .map((j) => ({
+      lat: j.last_lat!,
+      lng: j.last_lng!,
+      label: `${j.booking_number} — ${j.is_internal ? "Belliza crew" : j.provider_name} (${j.status.replace(/_/g, " ")})`,
+      kind: "driver" as const,
+    }));
 
   const batchable = await query<{
     provider_org_id: string;
@@ -108,11 +123,19 @@ export default async function DispatchBoardPage() {
         </ul>
       </section>
 
+      {liveMarkers.length > 0 && (
+        <section className="card overflow-hidden p-0">
+          <h2 className="p-4 pb-2 font-semibold text-navy-800">Live positions</h2>
+          <LiveMap markers={liveMarkers} height="320px" />
+          <p className="p-3 text-center text-xs text-navy-400">
+            Showing crews/providers currently en route with a recent GPS ping. Positions update automatically as the
+            crew app reports them.
+          </p>
+        </section>
+      )}
+
       <section className="card p-4">
         <h2 className="mb-3 font-semibold text-navy-800">Today&apos;s jobs (list view)</h2>
-        <p className="mb-2 text-xs text-navy-400">
-          Map view requires NEXT_PUBLIC_MAPBOX_TOKEN — not configured, so list/calendar views are shown instead.
-        </p>
         {todaysJobs.length === 0 && <p className="text-sm text-navy-500">No jobs scheduled for today.</p>}
         <ul className="divide-y divide-navy-100">
           {todaysJobs.map((j) => (

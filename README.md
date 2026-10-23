@@ -214,16 +214,32 @@ a real charge, payout, or message:
 | WhatsApp | Written to `notifications_outbox`, visible at Admin → Notifications (preferred over SMS whenever configured) | Set `WHATSAPP_ACCESS_TOKEN` / `WHATSAPP_PHONE_NUMBER_ID`, plus the `WHATSAPP_TEMPLATE_*` names for your approved Meta Message Templates |
 | SMS | Written to `notifications_outbox`, visible at Admin → Notifications | Set `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` |
 | Email | Same outbox, `status: demo_sent` | Wire an SMTP client into `lib/notify.ts`'s `tryEmail` (stubbed to return `false`) |
-| Map view | List/calendar views only, banner explains why | Set `NEXT_PUBLIC_MAPBOX_TOKEN` and add a map component (not built) |
-| Geocoding | None — distance falls back to a flat estimate, noted as a line item | Add a geocoding call when saving pickup/destination addresses |
 | File storage | Local disk (fine for a single-server demo, not for serverless) | Set `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET_NAME` — required before deploying anywhere without persistent disk |
+
+**Live map, GPS tracking, and geocoding are not in this table** — they're real,
+not simulated, and need no credentials: `lib/geocoding.ts` geocodes every
+destination address on save via OpenStreetMap's free Nominatim API (also
+what makes pricing's distance line item accurate instead of a flat
+estimate — `lib/booking-service.ts#distanceMilesBetween` already preferred
+real coordinates when present, they just never were before), and
+`components/LiveMap.tsx` renders OpenStreetMap tiles via Leaflet on the
+customer tracking page and the admin dispatch board. The crew app pings
+its GPS position (`components/LocationTracker.tsx` → `POST /api/location`)
+only while an assignment is `en_route_pickup`/`en_route_delivery`, throttled
+to once per 20s, silently no-op if location permission is denied. Nominatim
+and the public OSM tile server are free, shared, rate-limited services —
+fine for this app's actual call volume, but swap in a paid geocoder/tile
+provider before any real production traffic.
 
 ## Known limitations / not implemented
 
 Being direct about what a "senior engineer" ships in this scope vs. what's
 left, per the instruction not to overclaim:
 
-- **No real map view** — list/calendar only (see table above).
+- **Live tracking shows a point-in-time "last known position", not a
+  continuous breadcrumb trail** — `assignments.last_lat/last_lng` is a
+  single overwritten pair, not a ping-history table. Good enough for "where's
+  my driver right now"; not enough for a route-replay/audit view.
 - **i18n coverage is partial** — the mechanism (dictionary + cookie
   switch) is real and applied to login, all three app shells' navigation,
   and the customer tracking page, but most in-app copy (form labels,
@@ -264,6 +280,41 @@ left, per the instruction not to overclaim:
 - The document-upload flow accepts any file up to the 10MB Server Actions
   body-size limit (`next.config.ts`); there's no virus scanning or strict
   file-type sniffing beyond the extension.
+
+## Competitive gap analysis & roadmap
+
+Researched against Onfleet, Curri, Bringg, and furniture-specific white-glove
+delivery platforms (sources: see chat session, not re-cited here) to find
+real, verified gaps — each checked against this codebase before being
+listed, not assumed from category conventions:
+
+**Closed** (this session): live GPS tracking + map (customer tracking page
++ admin dispatch board, via Leaflet/OpenStreetMap — see the integrations
+table above) and real address geocoding (which also happened to fix
+previously-dead accurate-distance pricing — `distanceMilesBetween` already
+preferred real coordinates, they just never existed before).
+
+**Still open**, roughly in order of how consistently every competitor
+researched treats them as table stakes:
+
+1. **No provider/driver rating or review system.** Zero tables, zero UI.
+   In a two-sided marketplace (which this is), ratings are the core trust
+   signal between retailers and the providers actually delivering their
+   furniture — every comparable platform researched leads with this.
+2. **No customer self-service reschedule.** `change_orders` has a table
+   and audit trail but no UI to raise one — a window change has to go
+   through the retailer/store manually today.
+3. **Item-level assembly time doesn't feed ETAs/capacity.**
+   `booking_items.assembly_required` is a pricing-only boolean; it doesn't
+   add service-time to a stop's duration estimate, which is exactly what
+   furniture-specific platforms (InstaDispatch) call out as the thing that
+   actually blows up a route's schedule.
+4. **No e-commerce order import.** Bookings are 100% manual via the
+   wizard — no API/webhook for a retailer's own Shopify/WooCommerce to
+   auto-create one.
+5. **No offline evidence queue in the crew app** (already listed above) —
+   a dropped connection loses an in-progress photo upload rather than
+   queuing it for retry.
 
 ## Security posture
 
@@ -373,32 +424,33 @@ and set `APP_MODE` to `pilot` or `marketplace` deliberately.
 
 ### Outstanding work
 
-- **PR #10** (`claude/belliza-delivery-platform-865vys` → `main`) is open
-  but blocked on a real infra gap, now diagnosed: Vercel's **Preview**
-  environment is missing `DATABASE_URL` (and the other vars below) —
-  they're currently scoped to **Production** only. Next.js evaluates
-  every route handler during "Collecting page data" at build time, so any
-  route importing `lib/db.ts` throws `DATABASE_URL is not set` and fails
-  the *entire* preview build — independent of what the PR actually
-  changes (confirmed: even a single-line change failed identically).
-  **Fix (Vercel dashboard, not code)**: Project Settings → Environment
-  Variables → edit each of `DATABASE_URL`, `SESSION_SECRET`, `APP_MODE`,
-  `APP_BASE_URL`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
-  `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` → check the **Preview** box
-  alongside Production → Save. Only then will PR previews (and any future
-  PR against this repo) build successfully.
+- **PR #10 merged and deployed to production** (`a0dc78d`, confirmed via
+  Vercel's own commit status: "Deployment has completed"). It shipped the
+  photo-upload 413 fix, WhatsApp notifications, and staff invite-by-email.
+- **Vercel's Preview environment is still (probably) missing env vars** —
+  unclear if this got fixed. PR #10's *preview* build failed on every
+  commit (root cause: `DATABASE_URL` and friends are Production-only
+  scoped in Vercel, and Next.js evaluates every route handler at build
+  time, so any route importing `lib/db.ts` fails the whole preview build —
+  confirmed independent of code changes). It merged anyway because
+  Production deploys don't hit that gap. **Fix, if not already done**:
+  Vercel → Project Settings → Environment Variables → edit each of
+  `DATABASE_URL`, `SESSION_SECRET`, `APP_MODE`, `APP_BASE_URL`,
+  `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
+  `R2_BUCKET_NAME` → check **Preview** alongside Production → Save. Any
+  new PR (including the live-tracking one below) will likely show the
+  same red "Vercel" preview check until this is done — that's expected
+  and doesn't block merging to `main`.
 - **PR #7** ("Invite-by-email flow for staff logins") and **PR #8**
-  ("Add WhatsApp delivery notifications (Meta Cloud API)") are stale —
-  both predate the Supabase-removal rewrite and conflict with `main`.
-  Both features have now been rebuilt fresh against the current
-  architecture and folded into PR #10 (WhatsApp) and this branch's
-  retailer-staff invite flow (`lib/invites.ts`, `app/invite/[token]`).
-  Close both old PRs once #10 merges — reviving either old branch means
-  re-implementing it against the current schema anyway.
-- **Unverified**: the `sergiojr230985` Vercel team shown above wasn't
-  confirmed as actually owned by this login before using it further —
-  check Team Settings → Members there before trusting it with anything
-  sensitive.
+  ("Add WhatsApp delivery notifications (Meta Cloud API)") are stale and
+  should just be closed — both predate the Supabase-removal rewrite and
+  conflict with `main`, and both features were already rebuilt fresh and
+  shipped in PR #10 (WhatsApp) and the staff invite flow
+  (`lib/invites.ts`, `app/invite/[token]`).
+- **Unverified**: the `sergiojr230985` Vercel team this project's
+  deployments live under wasn't confirmed as actually owned by this login
+  — check Team Settings → Members there before trusting it with anything
+  sensitive. Still an open question as of this writing.
 
 ## Environment variables
 
